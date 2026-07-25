@@ -1,12 +1,12 @@
 {
   "name": "kora-frontend",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "description": "On-chain Invoice Financing Protocol built on Stellar Soroban",
   "scripts": {
-    "dev": "next dev --turbo",
-    "build": "next build",
-    "start": "next start",
+    "dev": "node init && next dev --turbo",
+    "build": "node init && next build",
+    "start": "node init && next start",
     "lint": "next lint",
     "type-check": "tsc --noEmit",
     "format": "prettier --write .",
@@ -20,7 +20,7 @@
     "test:mutation": "stryker run",
     "seed:testnet": "node --experimental-strip-types scripts/seed-testnet.ts",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
+    "build-storybook": "node init && storybook build",
     "release:dry": "semantic-release --dry-run",
     "prepare": "husky"
   },
