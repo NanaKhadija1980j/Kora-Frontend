@@ -1,3 +1,17 @@
+# [1.2.0](https://github.com/OpenLedger-Foundation/Kora-Frontend/compare/v1.1.0...v1.2.0) (2026-07-25)
+
+
+### Bug Fixes
+
+* resolve merge conflicts with upstream/main ([c5ac024](https://github.com/OpenLedger-Foundation/Kora-Frontend/commit/c5ac02446ecb947822b1e593024cec31135d739f))
+
+
+### Features
+
+* add route-level code splitting ([#253](https://github.com/OpenLedger-Foundation/Kora-Frontend/issues/253)) and service worker static asset caching ([#255](https://github.com/OpenLedger-Foundation/Kora-Frontend/issues/255)) ([bab73ef](https://github.com/OpenLedger-Foundation/Kora-Frontend/commit/bab73efa5a9d41916c77dc430624e22a803fd9fd))
+* implement marketplace virtual scrolling ([#251](https://github.com/OpenLedger-Foundation/Kora-Frontend/issues/251)) and add error boundary tests ([#250](https://github.com/OpenLedger-Foundation/Kora-Frontend/issues/250)) ([13752d5](https://github.com/OpenLedger-Foundation/Kora-Frontend/commit/13752d57914a4183b9f5922754128baebad7e1a0))
+* systematic lazy loading for wallet kit, Recharts, Stellar SDK, and pdf export ([6340129](https://github.com/OpenLedger-Foundation/Kora-Frontend/commit/6340129d8e8b1e3da76d0571ec57ab36afd24eee))
+
 # [1.1.0](https://github.com/OpenLedger-Foundation/Kora-Frontend/compare/v1.0.0...v1.1.0) (2026-07-24)
 
 
