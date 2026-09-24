@@ -14,6 +14,14 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:components": "playwright test --project=components",
+    "test:mobile": "playwright test --project=mobile-chrome",
+    "test:a11y": "playwright test e2e/a11y-audit.spec.ts",
+    "test:a11y:all": "playwright test e2e/a11y-audit.spec.ts e2e/accessibility.spec.ts",
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
     "check:i18n": "node scripts/check-i18n.mjs"
   },
   "dependencies": {

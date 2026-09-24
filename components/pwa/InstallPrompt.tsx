@@ -213,6 +213,7 @@ export function InstallPrompt() {
             <button
               type="button"
               onClick={handleInstall}
+              aria-label={t("install")}
               className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-primary px-3 py-2 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
               data-testid="install-prompt-install"
             >
@@ -222,6 +223,7 @@ export function InstallPrompt() {
             <button
               type="button"
               onClick={handleDismiss}
+              aria-label={t("notNow")}
               className="rounded-lg border border-zinc-700 px-3 py-2 text-xs font-medium text-zinc-400 transition-colors hover:border-zinc-600 hover:text-zinc-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-500/50"
               data-testid="install-prompt-not-now"
             >
