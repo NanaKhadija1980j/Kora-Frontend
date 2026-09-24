@@ -28,3 +28,64 @@ This repo intentionally keeps two changelog files:
 - **`public/CHANGELOG.md`** — Keep a Changelog format served at `/CHANGELOG.md` for the in-app changelog modal.
 
 When adding user-visible release notes for the app UI, update `public/CHANGELOG.md`. Release tooling manages the root file.
+
+### Which file do I edit?
+
+| Your change | Edit `public/CHANGELOG.md` | Edit root `CHANGELOG.md` |
+|---|---|---|
+| Users will notice it in the app | ✅ | ❌ never by hand |
+| Refactor, test, CI, or docs only | ❌ | ❌ |
+| Anything at all | — | ❌ semantic-release writes it |
+
+The root file is generated from commit messages on every release. Editing it by
+hand is not "also updating the changelog" — it is a conflict waiting for the
+next release commit to overwrite it. Write a good Conventional Commit message
+instead; that *is* how you edit the root changelog.
+
+### Worked example
+
+You added a CSV export button to the investor dashboard. Users will see it, so
+it belongs in `public/CHANGELOG.md` under `[Unreleased]`.
+
+**Before:**
+
+```markdown
+## [Unreleased]
+
+### Added
+- Command palette (Cmd/Ctrl+K) with invoice search, page navigation, and action commands.
+```
+
+**After:**
+
+```markdown
+## [Unreleased]
+
+### Added
+- Command palette (Cmd/Ctrl+K) with invoice search, page navigation, and action commands.
+- Export investor positions to CSV from the dashboard toolbar.
+```
+
+Then commit with a Conventional Commit message:
+
+```
+feat(dashboard): export investor positions to CSV
+```
+
+That commit line is what semantic-release turns into the root `CHANGELOG.md`
+entry at the next release. You never touch that file.
+
+Notes on the entry itself:
+
+- Write what the user can now do, not what you implemented. "Export investor
+  positions to CSV" beats "Add `useCsvExport` hook".
+- Add it under `[Unreleased]`, not under a released version heading — released
+  sections are history and editing them rewrites what shipped.
+- Use the Keep a Changelog headings: `Added`, `Changed`, `Deprecated`,
+  `Removed`, `Fixed`, `Security`. Create the heading if `[Unreleased]` does not
+  have it yet.
+
+**Counter-example.** You split a 400-line component into three files and the UI
+is pixel-identical. Nothing goes in `public/CHANGELOG.md` — there is nothing a
+user could notice. `refactor(marketplace): split InvoiceCard into subcomponents`
+is the whole deliverable.

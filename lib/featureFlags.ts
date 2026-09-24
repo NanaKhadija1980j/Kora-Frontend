@@ -15,15 +15,16 @@ import { useSyncExternalStore } from "react";
 /**
  * Every feature flag supported by the app. Add new flags here.
  *
- * | Flag              | Env var                               | Description                                    |
- * |-------------------|---------------------------------------|------------------------------------------------|
- * | mock-data         | NEXT_PUBLIC_ENABLE_MOCK_DATA           | Use mock data (no live Soroban)                |
- * | devtools          | NEXT_PUBLIC_ENABLE_DEVTOOLS            | Show React Query devtools                      |
- * | comparison        | NEXT_PUBLIC_ENABLE_COMPARISON          | Invoice comparison bar in marketplace          |
- * | onboarding-tour   | NEXT_PUBLIC_ENABLE_ONBOARDING_TOUR     | Guided onboarding tour for new users           |
- * | batch-actions     | NEXT_PUBLIC_ENABLE_BATCH_ACTIONS       | Batch cancel/repay in SME dashboard            |
- * | kyb-mint-gate     | NEXT_PUBLIC_ENABLE_KYB_MINT_GATE       | Gate invoice minting behind KYB verification   |
- * | secondary-market  | NEXT_PUBLIC_ENABLE_SECONDARY_MARKET    | Secondary market P2P trading route             |
+ * | Flag                      | Env var                                      | Description                                             |
+ * |---------------------------|----------------------------------------------|---------------------------------------------------------|
+ * | mock-data                 | NEXT_PUBLIC_ENABLE_MOCK_DATA                 | Use mock data (no live Soroban)                         |
+ * | devtools                  | NEXT_PUBLIC_ENABLE_DEVTOOLS                  | Show React Query devtools                               |
+ * | comparison                | NEXT_PUBLIC_ENABLE_COMPARISON                | Invoice comparison bar in marketplace                   |
+ * | onboarding-tour           | NEXT_PUBLIC_ENABLE_ONBOARDING_TOUR           | Guided onboarding tour for new users                    |
+ * | batch-actions             | NEXT_PUBLIC_ENABLE_BATCH_ACTIONS             | Batch cancel/repay in SME dashboard                     |
+ * | kyb-mint-gate             | NEXT_PUBLIC_ENABLE_KYB_MINT_GATE             | Gate invoice minting behind KYB verification            |
+ * | secondary-market          | NEXT_PUBLIC_ENABLE_SECONDARY_MARKET          | Secondary market P2P trading route                      |
+ * | category-taxonomy-preview | NEXT_PUBLIC_ENABLE_CATEGORY_TAXONOMY_PREVIEW | Developer taxonomy preview panel in marketplace filters |
  */
 export type FeatureFlag =
   | "mock-data"

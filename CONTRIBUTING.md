@@ -13,6 +13,7 @@ This guide is written for first-time contributors. Follow it from top to bottom 
 - [Daily Development Commands](#daily-development-commands)
 - [Storybook](#storybook)
 - [Internationalization (i18n)](#internationalization-i18n)
+  - [Checklist for a four-locale PR](#checklist-for-a-four-locale-pr)
 - [Your First Issue](#your-first-issue)
 - [Branch Naming](#branch-naming)
 - [Commit Messages](#commit-messages)
@@ -177,6 +178,45 @@ Each file is a nested JSON object grouped by feature/component namespace (`walle
 `createInvoice`, `invoiceCard`, `common`, and so on). **All four files must contain exactly the same set
 of keys**, in the same nested shape. This is enforced in CI — see [Checking parity](#checking-parity)
 below — so a PR that adds an English string without its translations will fail the build.
+
+### Checklist for a four-locale PR
+
+Copy this into your PR description and tick it off. Each step links to the
+detail below.
+
+```markdown
+- [ ] Key added to `messages/en.json` under the right namespace
+- [ ] Same key, same nesting path, added to `es.json`, `ar.json`, `pt-BR.json`
+- [ ] ICU placeholders identical in all four (`{count}` stays `{count}`)
+- [ ] No user-facing string left hardcoded in the component
+- [ ] `npm run check:i18n` passes locally
+- [ ] Checked the UI in Arabic (RTL) if the change is visual
+- [ ] Any untranslated placeholder copy called out explicitly in this PR
+```
+
+**The one command that matters:**
+
+```bash
+npm run check:i18n
+```
+
+It is wired into CI, so a locale mismatch blocks merge the same way a failing
+type-check does. Running it locally turns a round-trip through CI into a
+five-second check.
+
+#### Common pitfalls
+
+| Pitfall | What happens | Fix |
+|---|---|---|
+| Translated a placeholder name | `{count}` became `{cuenta}` — the value never interpolates and users see the literal brace text | Placeholder **names** are never translated; only the text around them |
+| Dropped a placeholder | `"Fund {amount} USDC"` → `"Financiar USDC"` — the number silently vanishes | `check:i18n` catches this; run it |
+| Added the key to `en.json` only | CI fails on parity | Add to all four in the same commit |
+| Different nesting path per locale | Key exists but `next-intl` can't resolve it | Same path in every file — `marketplace.filters.title`, not `marketplace.title` in one |
+| Pluralisation assumed from English | Arabic has six plural forms; a hand-rolled `{count} item(s)` reads wrong | Use ICU `plural` syntax and let the locale decide |
+| Only checked the LTR layout | Arabic silently breaks on absolutely-positioned elements — dropdowns, tooltips, badges | Switch the language toggle to Arabic and look; see [Right-to-left (Arabic)](#right-to-left-arabic) |
+| Placeholder English copy merged quietly | A locale drifts untranslated for months — this has already happened to `ar.json` | Say so in the PR description so a translator can follow up |
+
+Detail on each of these follows.
 
 ### Adding or changing a string
 
