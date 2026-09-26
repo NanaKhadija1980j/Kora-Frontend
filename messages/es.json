@@ -59,7 +59,10 @@
     "confirmed": "¡Transacción confirmada!",
     "failed": "Transacción fallida",
     "retry": "Reintentar",
-    "dismiss": "Descartar"
+    "dismiss": "Descartar",
+    "cancelSigningSafely": "Cancelar la firma de forma segura",
+    "addExtraTime": "Añadir tiempo adicional para una billetera lenta",
+    "cancelTransactionSigningSafely": "Cancelar la firma de la transacción de forma segura"
   },
   "landing": {
     "headline": "Financiamiento de Facturas, En Cadena",
