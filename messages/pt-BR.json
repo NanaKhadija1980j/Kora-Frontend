@@ -1318,5 +1318,21 @@
   "yieldProjection": {
     "exportSuccess": "Projeção exportada como PNG",
     "exportError": "Falha ao exportar o gráfico"
+  },
+  "portfolioDonut": {
+    "title": "Composição do portfólio",
+    "byRiskTier": "Por nível de risco",
+    "byJurisdiction": "Por jurisdição",
+    "byCategory": "Por categoria",
+    "dimensions": {
+      "riskTier": "Nível de risco",
+      "jurisdiction": "Jurisdição",
+      "category": "Categoria"
+    },
+    "chartAria": "Gráfico de rosca {title}",
+    "legendAria": "Legenda de {dimension}",
+    "legendItemAria": "Explorar o marketplace filtrado por {name}: {percent}",
+    "filteringBy": "Filtrando o marketplace por <strong>{dimension}</strong>: {value}",
+    "clearFilter": "Limpar filtro"
   }
 }

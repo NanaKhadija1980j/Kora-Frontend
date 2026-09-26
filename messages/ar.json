@@ -1318,5 +1318,21 @@
   "yieldProjection": {
     "exportSuccess": "تم تصدير التوقعات كملف PNG",
     "exportError": "فشل تصدير المخطط"
+  },
+  "portfolioDonut": {
+    "title": "تكوين المحفظة",
+    "byRiskTier": "حسب مستوى المخاطر",
+    "byJurisdiction": "حسب الولاية القضائية",
+    "byCategory": "حسب الفئة",
+    "dimensions": {
+      "riskTier": "مستوى المخاطر",
+      "jurisdiction": "الولاية القضائية",
+      "category": "الفئة"
+    },
+    "chartAria": "مخطط حلقي {title}",
+    "legendAria": "مفتاح {dimension}",
+    "legendItemAria": "تصفح السوق مع التصفية حسب {name}: {percent}",
+    "filteringBy": "تصفية السوق حسب <strong>{dimension}</strong>: {value}",
+    "clearFilter": "مسح عامل التصفية"
   }
 }

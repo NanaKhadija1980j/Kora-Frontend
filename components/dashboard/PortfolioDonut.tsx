@@ -24,6 +24,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { PieChart as PieChartIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/useFormatters";
 import {
   aggregatePositions,
@@ -45,6 +46,15 @@ export interface PortfolioDonutProps {
   activeFilter: DonutFilter | null;
   /** Called when the user clicks a segment (parent navigates to marketplace) */
   onSegmentClick: (filter: DonutFilter | null) => void;
+}
+
+function useDimensionLabels(): Record<DonutDimension, string> {
+  const t = useTranslations("portfolioDonut");
+  return {
+    riskTier: t("dimensions.riskTier"),
+    jurisdiction: t("dimensions.jurisdiction"),
+    category: t("dimensions.category"),
+  };
 }
 
 // ─── Custom active shape (highlighted segment) ───────────────────────────────
@@ -153,13 +163,15 @@ interface LegendProps {
 }
 
 function DonutLegend({ slices, dimension, activeValue, onItemClick }: LegendProps) {
+  const t = useTranslations("portfolioDonut");
+  const dimensionLabels = useDimensionLabels();
   const { formatCurrency, formatPercentage } = useFormatters();
   if (slices.length === 0) return null;
   return (
     <ul
       className="mt-3 w-full space-y-1.5"
       role="list"
-      aria-label={`${dimension} legend`}
+      aria-label={t("legendAria", { dimension: dimensionLabels[dimension] })}
     >
       {slices.map((slice) => {
         const isActive = activeValue === slice.name;
@@ -174,7 +186,10 @@ function DonutLegend({ slices, dimension, activeValue, onItemClick }: LegendProp
               )}
               onClick={() => onItemClick(slice.name)}
               aria-pressed={isActive}
-              aria-label={`Browse marketplace filtered by ${slice.name}: ${formatPercentage(slice.percent * 100, 1)}`}
+              aria-label={t("legendItemAria", {
+                name: slice.name,
+                percent: formatPercentage(slice.percent * 100, 1),
+              })}
             >
               <span className="flex min-w-0 items-center gap-2">
                 <span
@@ -228,6 +243,7 @@ function DonutPanel({
   activeFilter,
   onSegmentClick,
 }: DonutPanelProps) {
+  const t = useTranslations("portfolioDonut");
   const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 
   const activeValue =
@@ -298,7 +314,7 @@ function DonutPanel({
                       if (slice) handleClick(slice);
                     }}
                     style={{ cursor: "pointer" }}
-                    aria-label={`${title} donut chart`}
+                    aria-label={t("chartAria", { title })}
                   >
                     {slices.map((slice) => (
                       <Cell
@@ -358,22 +374,22 @@ interface FilterBadgeProps {
 }
 
 function ActiveFilterBadge({ filter, onClear }: FilterBadgeProps) {
-  const labels: Record<DonutDimension, string> = {
-    riskTier: "Risk Tier",
-    jurisdiction: "Jurisdiction",
-    category: "Category",
-  };
+  const t = useTranslations("portfolioDonut");
+  const labels = useDimensionLabels();
   return (
     <div className="flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-xs text-primary">
       <span>
-        Filtering marketplace by <strong>{labels[filter.dimension]}</strong>:{" "}
-        {filter.value}
+        {t.rich("filteringBy", {
+          dimension: labels[filter.dimension],
+          value: filter.value,
+          strong: (chunks) => <strong>{chunks}</strong>,
+        })}
       </span>
       <button
         type="button"
         onClick={onClear}
         className="ml-1 rounded-full p-0.5 transition-colors hover:bg-primary/20"
-        aria-label="Clear filter"
+        aria-label={t("clearFilter")}
       >
         ×
       </button>
@@ -388,6 +404,7 @@ export function PortfolioDonut({
   activeFilter,
   onSegmentClick,
 }: PortfolioDonutProps) {
+  const t = useTranslations("portfolioDonut");
   const riskSlices = useMemo(
     () => aggregatePositions(positions, "riskTier"),
     [positions]
@@ -408,7 +425,7 @@ export function PortfolioDonut({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-base font-semibold text-foreground">
-            Portfolio Composition
+            {t("title")}
           </h2>
           <p className="text-xs text-muted-foreground">
             Click a segment to browse matching invoices on the marketplace
@@ -426,21 +443,21 @@ export function PortfolioDonut({
         {hasPositions ? (
           <>
             <DonutPanel
-              title="By Risk Tier"
+              title={t("byRiskTier")}
               slices={riskSlices}
               dimension="riskTier"
               activeFilter={activeFilter}
               onSegmentClick={onSegmentClick}
             />
             <DonutPanel
-              title="By Jurisdiction"
+              title={t("byJurisdiction")}
               slices={jurisdictionSlices}
               dimension="jurisdiction"
               activeFilter={activeFilter}
               onSegmentClick={onSegmentClick}
             />
             <DonutPanel
-              title="By Category"
+              title={t("byCategory")}
               slices={categorySlices}
               dimension="category"
               activeFilter={activeFilter}
