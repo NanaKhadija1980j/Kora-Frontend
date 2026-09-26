@@ -122,7 +122,6 @@
     "shareFiltersCopied": "Filter link copied to clipboard",
     "searchPlaceholder": "Search by debtor, invoice number, or jurisdiction…",
     "clearSearch": "Clear search",
-    "searchAria": "Search marketplace",
     "filters": "Filters",
     "quickFilters": "Quick Filters",
     "marketplaceFilters": "Marketplace Filters",
@@ -156,6 +155,33 @@
       "dueLatest": "Due Date: Latest",
       "newest": "Newest Listed"
     },
+    "comparison": {
+      "barAriaLabel": "Invoice comparison bar",
+      "compare": "Compare",
+      "loading": "Loading {id}…",
+      "add": "+ Add",
+      "shareAriaLabel": "Copy shareable comparison link",
+      "share": "Share",
+      "copied": "Copied!",
+      "clearAriaLabel": "Clear all comparisons",
+      "selectAtLeastTwo": "Select at least 2 invoices to compare",
+      "openTable": "Open comparison table"
+    },
+    "watchlist": {
+      "ariaLabel": "Invoice watchlist",
+      "closeAriaLabel": "Close watchlist",
+      "title": "Watchlist",
+      "watchedCount": "{count, plural, one {# watched invoice} other {# watched invoices}}",
+      "emptyState": "Star an invoice to track it here.",
+      "raised": "raised",
+      "unstar": "Unstar {invoiceNumber}",
+      "alertPreferences": "Alert preferences",
+      "fundingProgress": "Funding progress",
+      "statusChanges": "Status changes",
+      "aprChanges": "APR changes",
+      "alertsPaused": "Alerts are paused."
+    },
+    "searchAria": "Search marketplace",
     "recovery": {
       "clearRiskTiers": "Clear Risk Tiers",
       "widenApr": "Widen APR Range",
@@ -606,6 +632,23 @@
       "annualisedReturn": "Annualised Return",
       "defaultRate": "Default Rate"
     },
+    "a11y": {
+      "filterJurisdiction": "Filter by jurisdiction",
+      "filterCategory": "Filter by category",
+      "clearFilters": "Clear all filters",
+      "exportPortfolio": "Export portfolio data",
+      "exportYield": "Export yield data",
+      "exportRisk": "Export risk data",
+      "exportReturn": "Export return data",
+      "exportVariance": "Export variance CSV",
+      "exportSellerMetrics": "Export seller listing metrics as CSV",
+      "sellerMetricsTable": "Seller listing metrics table",
+      "downloadDigest": "Download portfolio PDF digest",
+      "resetFilters": "Reset filters",
+      "exportData": "Export {label} data",
+      "fromDate": "From date",
+      "toDate": "To date"
+    },
     "treemap": {
       "title": "Portfolio Allocation",
       "empty": "No data to display",
@@ -630,24 +673,6 @@
       "title": "Portfolio Digest",
       "share": "Share Digest"
     }
-  },
-  "amendment": {
-    "title": "Amend Invoice",
-    "formAriaLabel": "Invoice amendment form",
-    "eligibleFields": "Editable Fields",
-    "descriptionLabel": "Amendment Description",
-    "descriptionPlaceholder": "Describe the changes being made...",
-    "categoryLabel": "Category",
-    "lockedFieldsNotice": "These fields cannot be changed after the invoice is minted.",
-    "submit": "Submit Amendment",
-    "submitting": "Submitting...",
-    "cancel": "Cancel",
-    "noChanges": "No changes detected",
-    "unknownError": "An unknown error occurred",
-    "successTitle": "Amendment Submitted",
-    "successDesc": "Amendment submitted successfully.",
-    "newCid": "New CID",
-    "blockedTitle": "Amendment Blocked"
   },
   "repaymentDialog": {
     "title": "Confirm Repayment",
@@ -815,7 +840,10 @@
     "retry": "Retry",
     "dismiss": "Dismiss",
     "processing": "Processing…",
-    "noResults": "No results for \"{query}\""
+    "noResults": "No results for \"{query}\"",
+    "selectOption": "Select option...",
+    "selectDate": "Select date...",
+    "searchOptions": "Search options..."
   },
   "verification": {
     "title": "Verify Wallet Ownership",
@@ -909,7 +937,9 @@
     "hintSettings": "Notification Settings",
     "navigate": "navigate",
     "select": "select",
-    "close": "close"
+    "close": "close",
+    "searchPlaceholder": "Search shortcuts",
+    "searchAriaLabel": "Search shortcuts"
   },
   "commandPalette": {
     "ariaLabel": "Command palette",
@@ -923,6 +953,9 @@
     "actionsLabel": "Actions",
     "connectWallet": "Connect Wallet",
     "createInvoice": "Create Invoice",
+    "navigate": "navigate",
+    "select": "select",
+    "close": "close",
     "disconnectWallet": "Disconnect Wallet",
     "shortcuts": "Shortcuts",
     "resultsLabel": "Command results",
@@ -932,9 +965,6 @@
     "pageSme": "My Invoices",
     "pageTransactions": "Transaction History",
     "pageAnalytics": "Analytics",
-    "navigate": "navigate",
-    "select": "select",
-    "close": "close",
     "synonyms": [
       "connect wallet",
       "create invoice",
@@ -1266,6 +1296,24 @@
     "openChangelogLabel": "Open changelog",
     "openChangelogUnreadLabel": "Open changelog (new release available)",
     "copyright": "© {year} Kora Protocol"
+  },
+  "amendment": {
+    "title": "Amend Invoice",
+    "formAriaLabel": "Invoice amendment form",
+    "eligibleFields": "Editable Fields",
+    "descriptionLabel": "Amendment Description",
+    "descriptionPlaceholder": "Describe the changes being made...",
+    "categoryLabel": "Category",
+    "lockedFieldsNotice": "These fields cannot be changed after the invoice is minted.",
+    "submit": "Submit Amendment",
+    "submitting": "Submitting...",
+    "cancel": "Cancel",
+    "noChanges": "No changes detected",
+    "unknownError": "An unknown error occurred",
+    "successTitle": "Amendment Submitted",
+    "successDesc": "Amendment submitted successfully.",
+    "newCid": "New CID",
+    "blockedTitle": "Amendment Blocked"
   },
   "yieldProjection": {
     "exportSuccess": "Projection exported as PNG",

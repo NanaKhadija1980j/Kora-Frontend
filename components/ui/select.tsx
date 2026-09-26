@@ -3,7 +3,16 @@
 import * as React from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { Check, ChevronDown, X, Loader2, Search } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
+
+function useSafeCommonTranslations() {
+  try {
+    return useTranslations("common");
+  } catch {
+    return null;
+  }
+}
 
 export interface Option {
   value: string;
@@ -77,7 +86,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       label,
       error,
       options = [],
-      placeholder = "Select option...",
+      placeholder,
       value,
       onChange,
       onBlur,
@@ -92,6 +101,9 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     },
     forwardedRef
   ) => {
+    const t = useSafeCommonTranslations();
+    const effectivePlaceholder = placeholder ?? (t?.("selectOption") || "Select option...");
+    const searchPlaceholder = t?.("searchOptions") || "Search options...";
     const [isOpen, setIsOpen] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState("");
     const [asyncOptions, setAsyncOptions] = React.useState<Option[]>([]);
@@ -302,7 +314,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           disabled={disabled}
           {...props}
         >
-          {placeholder && <option value="">{placeholder}</option>}
+          {effectivePlaceholder && <option value="">{effectivePlaceholder}</option>}
           {activeOptions.map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
@@ -328,12 +340,12 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
                   renderedChips?.length ? (
                     renderedChips
                   ) : (
-                    <span className="text-zinc-500">{placeholder}</span>
+                    <span className="text-zinc-500">{effectivePlaceholder}</span>
                   )
                 ) : selectedLabel ? (
                   <span className="text-zinc-250 font-medium">{selectedLabel}</span>
                 ) : (
-                  <span className="text-zinc-500">{placeholder}</span>
+                  <span className="text-zinc-500">{effectivePlaceholder}</span>
                 )}
               </div>
               <ChevronDown className={cn("h-4 w-4 text-zinc-500 transition-transform duration-200", isOpen && "rotate-185")} />
@@ -355,7 +367,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
                   <Search className="h-3.5 w-3.5 text-zinc-500" />
                   <input
                     type="text"
-                    placeholder="Search options..."
+                    placeholder={searchPlaceholder}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-zinc-500 disabled:cursor-not-allowed"

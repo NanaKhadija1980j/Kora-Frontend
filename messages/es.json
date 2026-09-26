@@ -122,7 +122,6 @@
     "shareFiltersCopied": "Enlace de filtro copiado al portapapeles",
     "searchPlaceholder": "Buscar por deudor, número de factura o jurisdicción…",
     "clearSearch": "Limpiar búsqueda",
-    "searchAria": "Buscar en el mercado",
     "filters": "Filtros",
     "quickFilters": "Filtros Rápidos",
     "marketplaceFilters": "Filtros del Mercado",
@@ -204,7 +203,34 @@
       "filterSource": "Filtros de Mercado",
       "schemaSource": "Esquema de Metadatos",
       "marketplaceSource": "Marketplace"
-    }
+    },
+    "comparison": {
+      "barAriaLabel": "Barra de comparación de facturas",
+      "compare": "Comparar",
+      "loading": "Cargando {id}…",
+      "add": "+ Agregar",
+      "shareAriaLabel": "Copiar enlace de comparación compartible",
+      "share": "Compartir",
+      "copied": "¡Copiado!",
+      "clearAriaLabel": "Limpiar todas las comparaciones",
+      "selectAtLeastTwo": "Selecciona al menos 2 facturas para comparar",
+      "openTable": "Abrir tabla de comparación"
+    },
+    "watchlist": {
+      "ariaLabel": "Lista de seguimiento de facturas",
+      "closeAriaLabel": "Cerrar lista de seguimiento",
+      "title": "Lista de seguimiento",
+      "watchedCount": "{count, plural, one {# factura seguida} other {# facturas seguidas}}",
+      "emptyState": "Marca una factura con estrella para seguirla aquí.",
+      "raised": "recaudado",
+      "unstar": "Quitar estrella de {invoiceNumber}",
+      "alertPreferences": "Preferencias de alertas",
+      "fundingProgress": "Progreso de financiamiento",
+      "statusChanges": "Cambios de estado",
+      "aprChanges": "Cambios de TAE",
+      "alertsPaused": "Las alertas están pausadas."
+    },
+    "searchAria": "Buscar en el mercado"
   },
   "invoiceDetail": {
     "backToMarketplace": "Volver al Mercado",
@@ -629,6 +655,23 @@
       "button": "Resumen PDF",
       "title": "Resumen de cartera",
       "share": "Compartir resumen"
+    },
+    "a11y": {
+      "filterJurisdiction": "Filtrar por jurisdicción",
+      "filterCategory": "Filtrar por categoría",
+      "clearFilters": "Limpiar todos los filtros",
+      "exportPortfolio": "Exportar datos de portafolio",
+      "exportYield": "Exportar datos de rendimiento",
+      "exportRisk": "Exportar datos de riesgo",
+      "exportReturn": "Exportar datos de retorno",
+      "exportVariance": "Exportar CSV de variación",
+      "exportSellerMetrics": "Exportar métricas de vendedor como CSV",
+      "sellerMetricsTable": "Tabla de métricas de vendedor",
+      "downloadDigest": "Descargar resumen de portafolio en PDF",
+      "resetFilters": "Restablecer filtros",
+      "exportData": "Exportar datos de {label}",
+      "fromDate": "Fecha desde",
+      "toDate": "Fecha hasta"
     }
   },
   "repaymentDialog": {
@@ -744,7 +787,7 @@
   },
   "pendingQueue": {
     "title": "{count, plural, one {# transacción pendiente} other {# transacciones pendientes}}",
-    "emptyState": "Sin transacciones pendientes: todos los sobres firmados han sido enviados.",
+    "emptyState": "No hay transacciones pendientes: todos los sobres firmados se han enviado.",
     "retryAll": "Reintentar todo",
     "retryAriaLabel": "Reintentar esta transacción",
     "removeAriaLabel": "Descartar esta transacción",
@@ -752,7 +795,7 @@
     "listAriaLabel": "Transacciones firmadas pendientes",
     "waitingOnline": "Esperando…",
     "retrySuccess": "Transacción enviada con éxito",
-    "retryFailed": "Error al enviar: se reintentará al estar en línea",
+    "retryFailed": "Error al enviar: se reintentará cuando esté en línea",
     "removed": "Borrador eliminado de la cola",
     "txType": "{type}",
     "unknownTx": "Transacción firmada",
@@ -797,7 +840,10 @@
     "retry": "Reintentar",
     "dismiss": "Descartar",
     "processing": "Procesando…",
-    "noResults": "Sin resultados para \"{query}\""
+    "noResults": "Sin resultados para \"{query}\"",
+    "selectOption": "Seleccionar opción...",
+    "selectDate": "Seleccionar fecha...",
+    "searchOptions": "Buscar opciones..."
   },
   "verification": {
     "title": "Verificar Propiedad de Billetera",
@@ -891,7 +937,9 @@
     "hintSettings": "Configuración de Notificaciones",
     "navigate": "navegar",
     "select": "seleccionar",
-    "close": "cerrar"
+    "close": "cerrar",
+    "searchPlaceholder": "Buscar atajos",
+    "searchAriaLabel": "Buscar atajos"
   },
   "commandPalette": {
     "ariaLabel": "Paleta de comandos",
@@ -905,6 +953,9 @@
     "actionsLabel": "Acciones",
     "connectWallet": "Conectar Billetera",
     "createInvoice": "Crear Factura",
+    "navigate": "navegar",
+    "select": "seleccionar",
+    "close": "cerrar",
     "disconnectWallet": "Desconectar Billetera",
     "shortcuts": "Atajos",
     "resultsLabel": "Resultados de comandos",
@@ -914,9 +965,6 @@
     "pageSme": "Mis Facturas",
     "pageTransactions": "Historial de Transacciones",
     "pageAnalytics": "Analíticas",
-    "navigate": "navegar",
-    "select": "seleccionar",
-    "close": "cerrar",
     "synonyms": [
       "conectar billetera",
       "crear factura",
@@ -1270,28 +1318,5 @@
   "yieldProjection": {
     "exportSuccess": "Proyección exportada como PNG",
     "exportError": "Error al exportar el gráfico"
-  },
-  "pendingQueue": {
-    "title": "{count, plural, one {# transacción pendiente} other {# transacciones pendientes}}",
-    "emptyState": "No hay transacciones pendientes: todos los sobres firmados se han enviado.",
-    "retryAll": "Reintentar todo",
-    "retryAriaLabel": "Reintentar esta transacción",
-    "removeAriaLabel": "Descartar esta transacción",
-    "offlineAriaLabel": "Esperando conexión",
-    "listAriaLabel": "Transacciones firmadas pendientes",
-    "waitingOnline": "Esperando…",
-    "retrySuccess": "Transacción enviada con éxito",
-    "retryFailed": "Error al enviar: se reintentará cuando esté en línea",
-    "removed": "Borrador eliminado de la cola",
-    "txType": "{type}",
-    "unknownTx": "Transacción firmada",
-    "invoiceLabel": "Factura #{id}",
-    "queuedAt": "En cola {time}",
-    "attempts": "{count, plural, one {# intento} other {# intentos}}",
-    "statusRetrying": "Reintentando",
-    "statusSuccess": "Enviado",
-    "statusError": "Fallido",
-    "statusPending": "En cola",
-    "badgeAriaLabel": "{count} transacción(es) pendiente(s)"
   }
 }

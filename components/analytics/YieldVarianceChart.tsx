@@ -25,6 +25,7 @@ import {
   YAxis,
 } from "recharts";
 import { Download, TrendingDown, TrendingUp } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useFormatters } from "@/hooks/useFormatters";
@@ -66,6 +67,7 @@ export default function YieldVarianceChart({
   compact = false,
   onExport,
 }: YieldVarianceChartProps) {
+  const t = useTranslations("analytics");
   const { formatCurrency, formatPercentage } = useFormatters();
 
   const rows = React.useMemo(() => computeVarianceRows(positions), [positions]);
@@ -106,7 +108,7 @@ export default function YieldVarianceChart({
             type="button"
             onClick={handleExport}
             className="rounded-md p-2 transition-colors hover:bg-muted"
-            aria-label="Export variance CSV"
+            aria-label={t("a11y.exportVariance")}
           >
             <Download className="h-4 w-4 text-muted-foreground hover:text-foreground" />
           </button>

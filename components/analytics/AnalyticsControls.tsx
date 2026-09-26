@@ -2,6 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Filter, Download, FileText, RotateCcw } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -41,6 +42,7 @@ export function AnalyticsControls({
   onDownloadDigest,
   isGeneratingDigest = false,
 }: AnalyticsControlsProps) {
+  const t = useTranslations("analytics");
   const ranges: Array<{ value: DateRange; label: string; description: string }> = [
     { value: "7d", label: "7 Days", description: "Last week" },
     { value: "30d", label: "30 Days", description: "Last month" },
@@ -92,7 +94,7 @@ export function AnalyticsControls({
             onClick={onDownloadDigest}
             disabled={isLoading || isGeneratingDigest}
             className="gap-1.5"
-            aria-label="Download portfolio PDF digest"
+            aria-label={t("a11y.downloadDigest")}
             title="Download a branded PDF summary of the filtered portfolio"
           >
             <FileText className="h-3.5 w-3.5" />
@@ -108,7 +110,7 @@ export function AnalyticsControls({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className="rounded-lg p-2 transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-            aria-label="Reset filters"
+            aria-label={t("a11y.resetFilters")}
             title="Reset to default"
           >
             <RotateCcw className="h-4 w-4 text-muted-foreground hover:text-foreground" />
@@ -133,7 +135,7 @@ export function AnalyticsControls({
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className="rounded-lg p-2 text-xs transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
-                  aria-label={`Export ${item.label} data`}
+                  aria-label={t("a11y.exportData", { label: item.label })}
                   title={`Download ${item.label} as CSV`}
                 >
                   <Download className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />

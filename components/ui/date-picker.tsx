@@ -3,7 +3,16 @@
 import * as React from "react";
 import * as Popover from "@radix-ui/react-popover";
 import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
+
+function useSafeCommonTranslations() {
+  try {
+    return useTranslations("common");
+  } catch {
+    return null;
+  }
+}
 import {
   format,
   parseISO,
@@ -43,11 +52,13 @@ const DatePicker = React.forwardRef<HTMLInputElement, DatePickerProps>(
       id,
       onChange,
       disabled,
-      placeholder = "Select date...",
+      placeholder,
       ...props
     },
     ref
   ) => {
+    const t = useSafeCommonTranslations();
+    const effectivePlaceholder = placeholder ?? (t?.("selectDate") || "Select date...");
     const generatedId = React.useId();
     const inputId = id || label?.toLowerCase().replace(/\s+/g, "-") || generatedId;
     const errorId = `${inputId}-error`;
@@ -221,7 +232,7 @@ const DatePicker = React.forwardRef<HTMLInputElement, DatePickerProps>(
               )}
             >
               <span className="truncate">
-                {selectedDate && isValid(selectedDate) ? format(selectedDate, "PPP") : placeholder}
+                {selectedDate && isValid(selectedDate) ? format(selectedDate, "PPP") : effectivePlaceholder}
               </span>
               <CalendarIcon className="h-4 w-4 text-muted-foreground shrink-0" />
             </button>
