@@ -1333,7 +1333,8 @@
     "selectAllAria": "Select all rows on this page",
     "selectRowAria": "Select row {id}",
     "sortByAria": "Sort by {column}",
-    "openDetailsAria": "Open details for {id}",
+    "openDetailsAria": "Open details for {id}"
+  },
   "portfolioDonut": {
     "title": "Portfolio Composition",
     "byRiskTier": "By Risk Tier",

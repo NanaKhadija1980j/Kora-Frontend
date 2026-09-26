@@ -1333,7 +1333,8 @@
     "selectAllAria": "تحديد جميع الصفوف في هذه الصفحة",
     "selectRowAria": "تحديد الصف {id}",
     "sortByAria": "الفرز حسب {column}",
-    "openDetailsAria": "فتح تفاصيل {id}",
+    "openDetailsAria": "فتح تفاصيل {id}"
+  },
   "portfolioDonut": {
     "title": "تكوين المحفظة",
     "byRiskTier": "حسب مستوى المخاطر",

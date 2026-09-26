@@ -1333,7 +1333,8 @@
     "selectAllAria": "Selecionar todas as linhas desta página",
     "selectRowAria": "Selecionar linha {id}",
     "sortByAria": "Ordenar por {column}",
-    "openDetailsAria": "Abrir detalhes de {id}",
+    "openDetailsAria": "Abrir detalhes de {id}"
+  },
   "portfolioDonut": {
     "title": "Composição do portfólio",
     "byRiskTier": "Por nível de risco",
