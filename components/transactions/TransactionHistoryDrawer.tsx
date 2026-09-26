@@ -25,6 +25,7 @@ import { cn } from "@/lib/utils";
 import { DatePicker } from "@/components/ui/date-picker";
 import { safeStellarTxUrl } from "@/lib/security";
 import { exportCsv } from "@/lib/export";
+import { useTranslations } from "next-intl";
 
 /**
  * TransactionHistoryDrawer
@@ -44,37 +45,37 @@ interface TransactionHistoryDrawerProps {
   limit?: number;
 }
 
-const TX_TYPE_LABELS: Record<
+const TX_TYPE_CONFIG: Record<
   string,
-  { label: string; icon: React.ReactNode; color: string }
+  { labelKey: string; icon: React.ReactNode; color: string }
 > = {
   mint_invoice: {
-    label: "Mint Invoice",
+    labelKey: "typeLabels.mint_invoice",
     icon: <FileText className="h-3.5 w-3.5" />,
     color: "text-blue-500",
   },
   fund_invoice: {
-    label: "Fund Invoice",
+    labelKey: "typeLabels.fund_invoice",
     icon: <Coins className="h-3.5 w-3.5" />,
     color: "text-green-500",
   },
   repay_invoice: {
-    label: "Repay Invoice",
+    labelKey: "typeLabels.repay_invoice",
     icon: <CheckCircle2 className="h-3.5 w-3.5" />,
     color: "text-purple-500",
   },
   claim_yield: {
-    label: "Claim Yield",
+    labelKey: "typeLabels.claim_yield",
     icon: <Coins className="h-3.5 w-3.5" />,
     color: "text-yellow-500",
   },
   transfer: {
-    label: "Transfer",
+    labelKey: "typeLabels.transfer",
     icon: <ChevronRight className="h-3.5 w-3.5" />,
     color: "text-indigo-500",
   },
   other: {
-    label: "Transaction",
+    labelKey: "typeLabels.other",
     icon: <Clock className="h-3.5 w-3.5" />,
     color: "text-gray-500",
   },
@@ -83,16 +84,18 @@ const TX_TYPE_LABELS: Record<
 function TransactionRow({
   tx,
   onSelect,
+  t,
 }: {
   tx: TransactionRecord;
   onSelect: (tx: TransactionRecord) => void;
+  t: (key: string) => string;
 }) {
-  const typeConfig = TX_TYPE_LABELS[tx.type] || TX_TYPE_LABELS.other;
+  const typeConfig = TX_TYPE_CONFIG[tx.type] || TX_TYPE_CONFIG.other;
   const isConfirmed = tx.status === "confirmed";
   const isFailed = tx.status === "failed";
   const isPending = tx.status === "pending";
 
-  const timeString = new Date(tx.timestamp).toLocaleString("en-US", {
+  const timeString = new Date(tx.timestamp).toLocaleString(undefined, {
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -119,7 +122,7 @@ function TransactionRow({
           <div className="flex-1 min-w-0 flex flex-col gap-1">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium text-foreground truncate">
-                {typeConfig.label}
+                {t(typeConfig.labelKey)}
               </span>
               {isPending && (
                 <motion.div
@@ -174,11 +177,13 @@ function TransactionRow({
 function TransactionDetail({
   tx,
   onClose,
+  t,
 }: {
   tx: TransactionRecord;
   onClose: () => void;
+  t: (key: string) => string;
 }) {
-  const typeConfig = TX_TYPE_LABELS[tx.type] || TX_TYPE_LABELS.other;
+  const typeConfig = TX_TYPE_CONFIG[tx.type] || TX_TYPE_CONFIG.other;
   const dateObj = new Date(tx.timestamp);
 
   // Only fetch details for confirmed transactions — cache forever (staleTime: Infinity)
@@ -200,11 +205,11 @@ function TransactionDetail({
     >
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-foreground">Transaction Details</h3>
+        <h3 className="font-semibold text-foreground">{t("drawer.detailsTitle")}</h3>
         <button
           type="button"
           onClick={onClose}
-          aria-label="Close transaction details"
+          aria-label={t("drawer.closeDetailsAria")}
           className="rounded-md p-1 hover:bg-muted transition-colors"
         >
           <X className="h-4 w-4 text-muted-foreground" />
@@ -213,17 +218,17 @@ function TransactionDetail({
 
       {/* Type */}
       <div className="space-y-1">
-        <p className="text-xs font-medium text-muted-foreground">Type</p>
+        <p className="text-xs font-medium text-muted-foreground">{t("drawer.type")}</p>
         <div className="flex items-center gap-2">
           <div className={cn("", typeConfig.color)}>{typeConfig.icon}</div>
-          <span className="text-sm text-foreground">{typeConfig.label}</span>
+          <span className="text-sm text-foreground">{t(typeConfig.labelKey)}</span>
         </div>
       </div>
 
       {/* Hash */}
       <div className="space-y-1">
         <p className="text-xs font-medium text-muted-foreground">
-          Transaction Hash
+          {t("drawer.txHash")}
         </p>
         <div className="flex items-center gap-2 bg-muted/50 rounded px-2.5 py-1.5 border border-border/50">
           <span className="text-xs font-mono text-foreground flex-1 break-all">
@@ -232,7 +237,7 @@ function TransactionDetail({
           <button
             type="button"
             onClick={() => navigator.clipboard.writeText(tx.hash)}
-            aria-label="Copy hash"
+            aria-label={t("drawer.copyHashAria")}
             className="shrink-0 rounded p-1 hover:bg-muted transition-colors"
           >
             <Copy className="h-3.5 w-3.5 text-muted-foreground hover:text-foreground" />
@@ -242,7 +247,7 @@ function TransactionDetail({
 
       {/* Status */}
       <div className="space-y-1">
-        <p className="text-xs font-medium text-muted-foreground">Status</p>
+        <p className="text-xs font-medium text-muted-foreground">{t("drawer.status")}</p>
         <div className="flex items-center gap-2">
           {tx.status === "confirmed" && (
             <CheckCircle2 className="h-4 w-4 text-green-500" />
@@ -254,7 +259,13 @@ function TransactionDetail({
             <Clock className="h-4 w-4 text-primary" />
           )}
           <span className="text-sm text-foreground capitalize">
-            {tx.status}
+            {tx.status === "confirmed"
+              ? t("statusLabels.confirmed")
+              : tx.status === "failed"
+                ? t("statusLabels.failed")
+                : tx.status === "pending"
+                  ? t("statusLabels.pending")
+                  : tx.status}
           </span>
         </div>
       </div>
@@ -262,7 +273,7 @@ function TransactionDetail({
       {/* Amount */}
       {tx.amount && (
         <div className="space-y-1">
-          <p className="text-xs font-medium text-muted-foreground">Amount</p>
+          <p className="text-xs font-medium text-muted-foreground">{t("drawer.amount")}</p>
           <p className="text-sm text-foreground font-medium">
             {tx.amount} {tx.assetCode}
           </p>
@@ -271,7 +282,7 @@ function TransactionDetail({
 
       {/* Date */}
       <div className="space-y-1">
-        <p className="text-xs font-medium text-muted-foreground">Date & Time</p>
+        <p className="text-xs font-medium text-muted-foreground">{t("drawer.dateTime")}</p>
         <p className="text-sm text-foreground">{dateObj.toLocaleString()}</p>
       </div>
 
@@ -279,7 +290,7 @@ function TransactionDetail({
       {tx.status === "confirmed" && (
         <div className="space-y-3 border-t pt-3">
           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-            On-chain Details
+            {t("drawer.onChainDetails")}
           </p>
 
           {loadingDetails ? (
@@ -290,23 +301,23 @@ function TransactionDetail({
             </div>
           ) : details ? (
             <div className="space-y-2 text-sm">
-              <DetailRow label="Ledger" value={String(details.ledger)} />
+              <DetailRow label={t("drawer.ledger")} value={String(details.ledger)} />
               <DetailRow
-                label="Fee Paid"
+                label={t("drawer.feePaid")}
                 value={`${details.feeXlm.toFixed(7)} XLM (${details.feePaid} stroops)`}
               />
               <DetailRow
-                label="Confirmed At"
+                label={t("drawer.confirmedAt")}
                 value={new Date(details.createdAt).toLocaleString()}
               />
               <DetailRow
-                label="Operations"
+                label={t("drawer.operations")}
                 value={String(details.operationCount)}
               />
-              {details.memo && <DetailRow label="Memo" value={details.memo} />}
+              {details.memo && <DetailRow label={t("drawer.memo")} value={details.memo} />}
             </div>
           ) : (
-            <p className="text-xs text-muted-foreground">Details unavailable</p>
+            <p className="text-xs text-muted-foreground">{t("drawer.detailsUnavailable")}</p>
           )}
         </div>
       )}
@@ -315,7 +326,7 @@ function TransactionDetail({
       {tx.description && (
         <div className="space-y-1">
           <p className="text-xs font-medium text-muted-foreground">
-            Description
+            {t("drawer.description")}
           </p>
           <p className="text-sm text-foreground">{tx.description}</p>
         </div>
@@ -324,7 +335,7 @@ function TransactionDetail({
       {/* Error */}
       {tx.error && (
         <div className="space-y-1">
-          <p className="text-xs font-medium text-muted-foreground">Error</p>
+          <p className="text-xs font-medium text-muted-foreground">{t("drawer.error")}</p>
           <p className="text-sm text-destructive bg-destructive/10 rounded px-2.5 py-1.5 border border-destructive/20">
             {tx.error}
           </p>
@@ -339,7 +350,7 @@ function TransactionDetail({
           rel="noopener noreferrer"
           className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-sm font-medium"
         >
-          View on Explorer
+          {t("drawer.viewExplorer")}
           <ChevronRight className="h-4 w-4" />
         </a>
       </div>
@@ -361,6 +372,7 @@ export function TransactionHistoryDrawer({
   onOpenChange,
   limit = 15,
 }: TransactionHistoryDrawerProps) {
+  const t = useTranslations("transactions");
   const allTransactions = useTransactionHistoryStore((s) => s.transactions);
   const filterType = useTransactionHistoryStore((s) => s.filterType);
   const filterStartDate = useTransactionHistoryStore((s) => s.filterStartDate);
@@ -407,7 +419,7 @@ export function TransactionHistoryDrawer({
 
   const handleClearHistory = () => {
     if (
-      window.confirm("Clear all transaction history? This cannot be undone.")
+      window.confirm(t("drawer.clearConfirm"))
     ) {
       clearHistory();
       setSelectedTx(null);
@@ -450,12 +462,12 @@ export function TransactionHistoryDrawer({
                 id="drawer-title"
                 className="text-lg font-semibold text-foreground"
               >
-                Transactions
+                {t("drawer.title")}
               </h2>
               <button
                 type="button"
                 onClick={() => onOpenChange(false)}
-                aria-label="Close transaction history"
+                aria-label={t("drawer.closeAria")}
                 className="rounded-lg p-2 hover:bg-muted transition-colors"
               >
                 <X className="h-5 w-5 text-muted-foreground" />
@@ -467,7 +479,7 @@ export function TransactionHistoryDrawer({
               <div className="px-4 py-3 border-b border-border/50 bg-card/40 flex flex-col gap-2">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-                    Filters
+                    {t("drawer.filters")}
                   </span>
                   {(filterType !== "all" || filterStartDate || filterEndDate) && (
                     <button
@@ -475,7 +487,7 @@ export function TransactionHistoryDrawer({
                       onClick={resetFilters}
                       className="text-xs text-primary hover:underline font-medium"
                     >
-                      Reset
+                      {t("drawer.reset")}
                     </button>
                   )}
                 </div>
@@ -485,30 +497,30 @@ export function TransactionHistoryDrawer({
                       value={filterType}
                       onChange={(e) => setFilterType(e.target.value)}
                       className="w-full h-9 rounded-lg border border-input bg-card px-3 text-xs text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                      aria-label="Filter by type"
+                      aria-label={t("drawer.filterByTypeAria")}
                     >
-                      <option value="all">All Types</option>
-                      <option value="mint">Mints</option>
-                      <option value="fund">Funding</option>
-                      <option value="repay">Repayments</option>
-                      <option value="claim">Claims</option>
+                      <option value="all">{t("types.all")}</option>
+                      <option value="mint">{t("types.mint")}</option>
+                      <option value="fund">{t("types.fund")}</option>
+                      <option value="repay">{t("types.repay")}</option>
+                      <option value="claim">{t("types.claim")}</option>
                     </select>
                   </div>
                   <div>
                     <DatePicker
-                      placeholder="Start date"
+                      placeholder={t("drawer.startDatePlaceholder")}
                       value={filterStartDate || ""}
                       onChange={(e) => setFilterStartDate(e.target.value || null)}
-                      aria-label="Start date filter"
+                      aria-label={t("drawer.startDateFilterAria")}
                       className="h-9 text-xs"
                     />
                   </div>
                   <div>
                     <DatePicker
-                      placeholder="End date"
+                      placeholder={t("drawer.endDatePlaceholder")}
                       value={filterEndDate || ""}
                       onChange={(e) => setFilterEndDate(e.target.value || null)}
-                      aria-label="End date filter"
+                      aria-label={t("drawer.endDateFilterAria")}
                       className="h-9 text-xs"
                     />
                   </div>
@@ -522,6 +534,7 @@ export function TransactionHistoryDrawer({
                 <TransactionDetail
                   tx={selectedTx}
                   onClose={() => setSelectedTx(null)}
+                  t={t}
                 />
               ) : filteredTransactions.length === 0 ? (
                 allTransactions.length === 0 ? (
@@ -529,10 +542,10 @@ export function TransactionHistoryDrawer({
                     <Clock className="h-8 w-8 text-muted-foreground" />
                     <div>
                       <p className="text-sm font-medium text-foreground">
-                        No transactions yet
+                        {t("drawer.emptyTitle")}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Transactions will appear here
+                        {t("drawer.emptyDesc")}
                       </p>
                     </div>
                   </div>
@@ -541,10 +554,10 @@ export function TransactionHistoryDrawer({
                     <Clock className="h-8 w-8 text-muted-foreground" />
                     <div>
                       <p className="text-sm font-medium text-foreground">
-                        No results
+                        {t("drawer.noResultsTitle")}
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
-                        Try adjusting your filters
+                        {t("drawer.noResultsDesc")}
                       </p>
                     </div>
                   </div>
@@ -556,6 +569,7 @@ export function TransactionHistoryDrawer({
                       key={tx.hash}
                       tx={tx}
                       onSelect={(selected) => setSelectedTx(selected)}
+                      t={t}
                     />
                   ))}
                 </div>
@@ -569,17 +583,17 @@ export function TransactionHistoryDrawer({
                   type="button"
                   onClick={handleExport}
                   disabled={filteredTransactions.length === 0}
-                  aria-label="Export transactions to CSV"
+                  aria-label={t("drawer.exportAria")}
                   className="flex-1 flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
                 >
                   <Download className="h-4 w-4" />
-                  Export
+                  {t("drawer.export")}
                 </button>
                 {allTransactions.length > 0 && (
                   <button
                     type="button"
                     onClick={handleClearHistory}
-                    aria-label="Clear transaction history"
+                    aria-label={t("drawer.clearAria")}
                     className="flex items-center justify-center px-3 py-2 rounded-lg bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors"
                   >
                     <Trash2 className="h-4 w-4" />

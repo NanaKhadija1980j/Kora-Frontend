@@ -1,6 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { expect, userEvent, within } from "@storybook/test";
+import { NextIntlClientProvider } from "next-intl";
+import en from "@/messages/en.json";
 import { TransactionHistoryDrawer } from "./TransactionHistoryDrawer";
 import { useTransactionHistoryStore } from "@/store/transactionHistoryStore";
 
@@ -39,9 +41,11 @@ const meta: Meta<typeof TransactionHistoryDrawer> = {
       });
 
       return (
-        <QueryClientProvider client={new QueryClient()}>
-          <Story />
-        </QueryClientProvider>
+        <NextIntlClientProvider locale="en" messages={en}>
+          <QueryClientProvider client={new QueryClient()}>
+            <Story />
+          </QueryClientProvider>
+        </NextIntlClientProvider>
       );
     },
   ],

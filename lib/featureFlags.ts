@@ -34,7 +34,8 @@ export type FeatureFlag =
   | "batch-actions"
   | "kyb-mint-gate"
   | "secondary-market"
-  | "category-taxonomy-preview";
+  | "category-taxonomy-preview"
+  | "test-components";
 
 export const FEATURE_FLAGS: readonly FeatureFlag[] = [
   "mock-data",
@@ -45,6 +46,7 @@ export const FEATURE_FLAGS: readonly FeatureFlag[] = [
   "kyb-mint-gate",
   "secondary-market",
   "category-taxonomy-preview",
+  "test-components",
 ];
 
 export type FeatureFlagState = Record<FeatureFlag, boolean>;
@@ -63,6 +65,7 @@ const FLAG_ENV_MAP: Record<FeatureFlag, string> = {
   "kyb-mint-gate": "NEXT_PUBLIC_ENABLE_KYB_MINT_GATE",
   "secondary-market": "NEXT_PUBLIC_ENABLE_SECONDARY_MARKET",
   "category-taxonomy-preview": "NEXT_PUBLIC_ENABLE_CATEGORY_TAXONOMY_PREVIEW",
+  "test-components": "NEXT_PUBLIC_ENABLE_TEST_COMPONENTS",
 };
 
 function readEnvFlag(flag: FeatureFlag): boolean {

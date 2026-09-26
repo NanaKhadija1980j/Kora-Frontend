@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useMemo, useEffect, useCallback, useRef, Suspense } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
@@ -435,7 +435,7 @@ function SecondaryMarketplaceContent() {
   };
 
   return (
-    <main className="min-h-screen bg-zinc-950 py-8 text-zinc-100">
+    <div className="min-h-screen bg-zinc-950 py-8 text-zinc-100">
       <Container>
         {/* Header */}
         <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -818,7 +818,7 @@ function SecondaryMarketplaceContent() {
           </div>
         </BottomSheet>
       </Container>
-    </main>
+    </div>
   );
 }
 
@@ -826,7 +826,7 @@ export default function SecondaryMarketplacePage() {
   return (
     <Suspense
       fallback={
-        <main className="min-h-screen bg-zinc-950 py-8 text-zinc-100">
+        <div className="min-h-screen bg-zinc-950 py-8 text-zinc-100">
           <Container>
             <div className="mb-8 space-y-2">
               <div className="h-8 w-64 animate-pulse rounded bg-zinc-800" />
@@ -838,7 +838,7 @@ export default function SecondaryMarketplacePage() {
               ))}
             </div>
           </Container>
-        </main>
+        </div>
       }
     >
       <SecondaryMarketplaceContent />

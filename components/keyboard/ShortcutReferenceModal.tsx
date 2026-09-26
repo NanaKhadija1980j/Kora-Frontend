@@ -167,8 +167,8 @@ export function ShortcutReferenceModal({ open, onClose }: ShortcutReferenceModal
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search shortcuts"
-                aria-label="Search shortcuts"
+                placeholder={t("searchPlaceholder")}
+                aria-label={t("searchAriaLabel")}
                 className="w-full rounded-xl border border-border bg-muted/40 py-2 pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
               />
             </div>

@@ -13,6 +13,7 @@ This document describes the technical architecture of the Kora Protocol frontend
 - [Wallet Integration](#wallet-integration)
 - [Contract Interaction](#contract-interaction)
 - [Transaction Lifecycle Deep Dive](#transaction-lifecycle-deep-dive)
+- [Secondary Market](#secondary-market)
 - [IPFS Storage](#ipfs-storage)
 - [Rendering Strategy](#rendering-strategy)
 - [Security Considerations](#security-considerations)
@@ -391,6 +392,97 @@ stage — wallet connection state changes independently, through
 
 ---
 
+## Secondary Market
+
+The secondary market lets an investor sell a position they already hold to
+another buyer (P2P). It is gated behind the `secondary-market` feature flag
+(`NEXT_PUBLIC_ENABLE_SECONDARY_MARKET` in [`lib/featureFlags.ts`](lib/featureFlags.ts)).
+
+### Route
+
+- `/secondary` — client page (`app/secondary/page.tsx`), wrapped in `Suspense`.
+  It composes the listing grid, filters/sort, seller analytics, and the
+  acquire/accept dialogs into one client component.
+- `/dashboard/investor` — where a seller marks a position "for sale" via
+  `listPosition` (and can unlist it).
+- Shareable filter/sort state (`q`, `tenor`, `yield`, `seller`, `highlight`)
+  is read from and written to the URL via
+  [`lib/secondaryUrlFilters.ts`](lib/secondaryUrlFilters.ts) (#643);
+  pure sort logic lives in [`lib/secondarySort.ts`](lib/secondarySort.ts).
+
+### Stores
+
+[`store/positionListingStore.ts`](store/positionListingStore.ts) is a persisted
+Zustand store (localStorage key `kora-position-listings`) tracking
+`PositionListingMeta` entries keyed by position id. Listing is UI-only (#442):
+it records the seller's intent and ask price, while the on-chain sale happens
+separately through `prepareTransferPosition` in
+[`services/invoiceService.ts`](services/invoiceService.ts) (#443).
+
+| Action | Purpose |
+|--------|---------|
+| `listPosition` / `unlistPosition` | Add/remove a listing; preserves `listedAt` when re-listing at a new price |
+| `reconcileListings(ownedPositionIds)` | Prunes listings for positions the wallet no longer holds — run after every successful `usePositions` fetch (`hooks/usePositions.ts`) |
+| `getListingsByInvoiceToken(tokenId)` | Per-invoice listing depth, rendered by `components/invoice/InvoiceOrderBookDepth.tsx` |
+
+### Fee helpers
+
+[`lib/secondaryFees.ts`](lib/secondaryFees.ts) is the single source of truth
+for secondary-market fee arithmetic (#597); UI never computes fees itself, it
+only formats what `computeAcquisitionFees` returns. Schedules are configured in
+basis points in validated env (`lib/env.ts`): protocol fee defaults to 50 bps,
+market fee to 25 bps. The total is derived by summing the individually-rounded
+parts so a disclosed breakdown always reconciles with the total.
+
+[`components/secondary/FeeDisclosure.tsx`](components/secondary/FeeDisclosure.tsx)
+renders that breakdown on each listing card (`inline` variant) and inside the
+dialogs (`full` variant).
+
+### Dialogs
+
+| Dialog | Issue | Purpose |
+|--------|-------|---------|
+| `components/invoice/AcquirePositionDialog.tsx` | #642 | Confirms an acquisition before any tx is built; surfaces implied-discount/premium risk banners |
+| `components/invoice/AcceptTransferDialog.tsx` | #732 | Buyer accept-position transfer shell; shows a graceful NOT_IMPLEMENTED banner until the transfer ABI is confirmed |
+| `components/secondary/FeeDisclosure.tsx` | #597 | Fee breakdown (see above) |
+
+### Buyer flow
+
+Acquire and accept-transfer run through the same simulation gate
+(`build → simulate → preview → sign → submit → poll`) as fund/transfer:
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant UI as /secondary page
+    participant Dlg as AcquirePositionDialog
+    participant FLOW as useAcquirePositionFlow / useTransferPositionFlow
+    participant TX as useTransaction
+    participant SVC as invoiceService / contracts.ts
+    participant RPC as Soroban RPC
+    participant WK as useWallet
+
+    User->>UI: Click "Acquire Position"
+    UI->>Dlg: open dialog (risk banners)
+    Dlg->>UI: onConfirm()
+    UI->>FLOW: acquirePosition(positionId, buyer, seller)
+    FLOW->>TX: tx.execute(buildFn)
+    TX->>SVC: buildFn() → prepareTransferPosition()
+    SVC-->>TX: unsigned XDR (assumed `transfer_position` ABI, #443)
+    TX->>RPC: simulate + preview gate
+    TX->>WK: sign
+    TX->>RPC: submit + poll
+    TX-->>UI: toast + listing update
+```
+
+`useTransferPositionFlow().acceptTransfer` is currently a stub that routes
+`prepareAcceptPositionTransfer`'s NOT_IMPLEMENTED error through the standard
+toast path. The integration point and assumptions for wiring in a future
+buyer-accept contract call are documented on that function
+(`services/invoiceService.ts:949`).
+
+---
+
 ## IPFS Storage
 
 Invoice documents and metadata are stored on IPFS via Pinata:
@@ -418,6 +510,7 @@ The on-chain NFT stores only the IPFS CID. The full metadata is always retrievab
 | `/` (Landing) | Static + Client hydration | SEO, animations |
 | `/marketplace` | Client | Dynamic filters, wallet state |
 | `/marketplace/[id]` | SSR/ISR + Client | Server `generateMetadata` + JSON-LD/OG from IPFS; client fund panel |
+| `/secondary` | Client | Dynamic filters, wallet state, dialogs |
 | `/invoice/create` | Client | Form, file upload, wallet |
 | `/dashboard/sme` | Client | Wallet-gated |
 | `/dashboard/investor` | Client | Wallet-gated |

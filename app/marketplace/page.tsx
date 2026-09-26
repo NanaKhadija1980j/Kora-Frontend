@@ -14,6 +14,7 @@ import {
   Clock,
   Download,
   Star,
+  Layers,
 } from "lucide-react";
 import EmptyState, { type RecoverySuggestion } from "@/components/ui/EmptyState";
 import {
@@ -41,6 +42,7 @@ import { ErrorBoundary } from "@/components/ui/error-boundary";
 import { RangeSlider } from "@/components/ui/range-slider";
 import { ComparisonBar } from "@/components/marketplace/ComparisonBar";
 import ActiveFilterChips from "@/components/marketplace/ActiveFilterChips";
+import { CategoryTaxonomyPreview } from "@/components/marketplace/CategoryTaxonomyPreview";
 import { useFeatureFlag } from "@/lib/featureFlags";
 import { useDebounce } from "@/hooks/useDebounce";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
@@ -87,6 +89,8 @@ const getJurisdictionOptions = (t: TFunc) => [
   { value: "EU", label: t("jurisdictionOptions.EU") },
   { value: "UK", label: t("jurisdictionOptions.UK") },
   { value: "OTHER", label: t("jurisdictionOptions.OTHER") },
+  { value: "IN", label: t("jurisdictionOptions.IN") },
+  { value: "BR", label: t("jurisdictionOptions.BR") },
 ];
 
 // Risk-tier codes (AAA, AA, A, BBB, BB, B, CCC) are rating-agency codes, not
@@ -144,7 +148,7 @@ function CheckboxGroup({
           return (
             <label
               key={opt.value}
-              className={`flex items-center gap-2 rounded-lg border p-2 text-xs font-medium cursor-pointer transition-colors ${
+              className={`flex items-center gap-2 rounded-lg border p-2 text-xs font-medium cursor-pointer transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 ${
                 isChecked
                   ? "border-primary/50 bg-primary/5 text-foreground"
                   : "border-zinc-800 bg-zinc-900/20 text-zinc-400 hover:border-zinc-700 hover:text-zinc-300"
@@ -200,9 +204,8 @@ function Switch({
         role="switch"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
-        aria-checked={checked}
         aria-describedby={description ? `${id}-desc` : undefined}
-        className="sr-only"
+        className="sr-only focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900"
       />
       <div
         aria-hidden="true"
@@ -725,7 +728,11 @@ function MarketplaceContent() {
         <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center">
           <div className="flex-1" ref={searchRef} data-tour="marketplace-search">
             <div className="relative">
+              <label htmlFor="marketplace-search" className="sr-only">
+                {t("searchAria")}
+              </label>
               <Input
+                id="marketplace-search"
                 placeholder={t("searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
@@ -1015,6 +1022,7 @@ function MarketplaceContent() {
       {/* Fixed comparison bar — renders above the page when invoices are selected */}
       {comparisonEnabled && <ComparisonBar />}
       <WatchlistDrawer open={watchlistOpen} onClose={() => setWatchlistOpen(false)} />
+      <CategoryTaxonomyPreview invoices={allInvoices} />
     </Container>
   );
 }

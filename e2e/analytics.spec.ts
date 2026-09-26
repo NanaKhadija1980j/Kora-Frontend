@@ -12,24 +12,10 @@
  *   e2e/dashboard.spec.ts.
  */
 import { test, expect, type BrowserContext } from "@playwright/test";
-import { MOCK_ADDRESS } from "./helpers/mock-wallet";
+import { MOCK_ADDRESS, injectWalletStubs } from "./helpers/mock-wallet";
 
 async function injectConnectedWallet(context: BrowserContext) {
-  await context.addInitScript((address) => {
-    const walletState = {
-      state: {
-        address,
-        publicKey: address,
-        isConnected: true,
-        provider: "freighter",
-        balance: "1000.00",
-        isVerified: false,
-        verifiedAt: null,
-      },
-      version: 0,
-    };
-    localStorage.setItem("kora-wallet-store", JSON.stringify(walletState));
-  }, MOCK_ADDRESS);
+  await injectWalletStubs(context);
 }
 
 test.describe("Analytics page — disconnected", () => {
@@ -60,4 +46,32 @@ test.describe("Analytics page — connected", () => {
       page.getByRole("heading", { name: /connect your wallet/i })
     ).not.toBeVisible();
   });
+
+  test("triggers portfolio PDF digest download", async ({ page, context }) => {
+    await injectConnectedWallet(context);
+    await page.goto("/analytics");
+
+    await expect(
+      page.getByRole("heading", { name: /connect your wallet/i })
+    ).not.toBeVisible();
+
+    const digestButton = page.getByRole("button", {
+      name: /download portfolio pdf digest|pdf digest/i,
+    });
+
+    await expect(digestButton).toBeVisible();
+
+    // Skips gracefully when portfolio empty in mock
+    if (await digestButton.isDisabled()) {
+      test.skip(true, "Portfolio is empty in mock data, skipping PDF download assertion");
+      return;
+    }
+
+    const downloadPromise = page.waitForEvent("download");
+    await digestButton.click();
+    const download = await downloadPromise;
+
+    expect(download.suggestedFilename()).toMatch(/^kora-portfolio-digest-.*\.pdf$/);
+  });
 });
+

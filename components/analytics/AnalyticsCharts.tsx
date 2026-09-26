@@ -25,6 +25,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import { Download, TrendingUp, TrendingDown } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/useFormatters";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { isRTL } from "@/i18n/config";
@@ -157,6 +158,7 @@ export default function AnalyticsCharts({
   benchmarkConfig,
 }: AnalyticsChartsProps) {
   const chartHeight = compact ? 180 : 240;
+  const t = useTranslations("analytics");
   const locale = useLocale();
   const rtl = isRTL(locale);
   const { formatCurrency, formatNumber, formatPercentage } = useFormatters();
@@ -185,7 +187,7 @@ export default function AnalyticsCharts({
                 type="button"
                 onClick={() => onExport("portfolio")}
                 className="rounded-md p-2 transition-colors hover:bg-muted"
-                aria-label="Export portfolio data"
+                aria-label={t("a11y.exportPortfolio")}
               >
                 <Download className="h-4 w-4 text-muted-foreground hover:text-foreground" />
               </button>
@@ -264,7 +266,7 @@ export default function AnalyticsCharts({
                 type="button"
                 onClick={() => onExport("yield")}
                 className="rounded-md p-2 transition-colors hover:bg-muted"
-                aria-label="Export yield data"
+                aria-label={t("a11y.exportYield")}
               >
                 <Download className="h-4 w-4 text-muted-foreground hover:text-foreground" />
               </button>
@@ -332,7 +334,7 @@ export default function AnalyticsCharts({
                 type="button"
                 onClick={() => onExport("risk")}
                 className="rounded-md p-2 transition-colors hover:bg-muted"
-                aria-label="Export risk data"
+                aria-label={t("a11y.exportRisk")}
               >
                 <Download className="h-4 w-4 text-muted-foreground hover:text-foreground" />
               </button>
@@ -416,7 +418,7 @@ export default function AnalyticsCharts({
                 type="button"
                 onClick={() => onExport("monthly")}
                 className="rounded-md p-2 transition-colors hover:bg-muted"
-                aria-label="Export return data"
+                aria-label={t("a11y.exportReturn")}
               >
                 <Download className="h-4 w-4 text-muted-foreground hover:text-foreground" />
               </button>

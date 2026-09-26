@@ -12,6 +12,7 @@ This guide is written for first-time contributors. Follow it from top to bottom 
 - [Mock Data Mode](#mock-data-mode)
 - [Daily Development Commands](#daily-development-commands)
 - [Storybook](#storybook)
+- [Component Test Fixtures](#component-test-fixtures)
 - [Internationalization (i18n)](#internationalization-i18n)
   - [Checklist for a four-locale PR](#checklist-for-a-four-locale-pr)
 - [Your First Issue](#your-first-issue)
@@ -127,18 +128,34 @@ Other useful commands:
 ```bash
 npm run test:watch       # run Vitest in watch mode
 npm run test:coverage    # generate a coverage report
-npm run test:e2e         # run Playwright end-to-end tests
+npm run test:e2e         # run Playwright end-to-end tests (all projects)
+npm run test:components  # browser component tests (Playwright --project=components)
+npm run test:mobile      # mobile E2E (Pixel 5 emulation)
+npm run test:a11y        # axe audit for key routes (e2e/a11y-audit.spec.ts)
+npm run test:a11y:all    # a11y + skip-link checks (a11y-audit + accessibility)
+npm run check:i18n       # locale parity check (messages/*.json)
+npm run storybook        # local Storybook dev server (p6006) — requires storybook deps
+npm run build-storybook  # static Storybook build
 npm run format:check     # check Prettier formatting
 npm run format           # format files with Prettier
 ```
+
+These map 1:1 to CI entrypoints — see `.github/workflows/test.yml` (`test:e2e`, `test:components`, `test:mobile`) and `.github/workflows/a11y.yml` (`test:a11y`). The `storybook` scripts are available when `@storybook/*` deps are installed; otherwise `npm run test -- __tests__/stories.snapshot.test.tsx` (Vitest) covers story rendering without a dev server (see [Storybook](#storybook)).
 
 If a command fails because of existing unrelated failures, mention that clearly in your PR description and include the exact command output that proves your changed area was tested.
 
 ## Storybook
 
-Component stories live beside components as `*.stories.tsx` files. Storybook
-packages are not currently wired as an `npm run storybook` script; use Vitest
-snapshot coverage instead:
+Component stories live beside components as `*.stories.tsx` files. Use the
+contributor scripts:
+
+```bash
+npm run storybook          # dev server at http://localhost:6006 (requires @storybook/* deps)
+npm run build-storybook    # static build to ./storybook-static
+```
+
+If Storybook deps are not installed, Vitest snapshot coverage provides the same
+render check without a dev server:
 
 ```bash
 npm run test -- __tests__/stories.snapshot.test.tsx
@@ -159,6 +176,12 @@ npx vitest run __tests__/stories.snapshot.test.tsx --updateSnapshot
 ```
 
 The generated snapshots are stored in `__tests__/__snapshots__/` and must be committed to the repository.
+
+## Component Test Fixtures
+
+For local QA and isolated component testing (such as Playwright component tests for `FileInput`, `RangeSlider`, and `DatePicker`), an isolated test fixture page is available at `/test-components`.
+
+This route is development-only (`NODE_ENV !== "production"` or when `NEXT_PUBLIC_ENABLE_TEST_COMPONENTS="true"`). In production builds, requests to `/test-components` are automatically redirected to the home page (`/`).
 
 ## Internationalization (i18n)
 

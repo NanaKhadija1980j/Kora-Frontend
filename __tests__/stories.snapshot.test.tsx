@@ -129,6 +129,55 @@ vi.mock("framer-motion", () => ({
   useReducedMotion: () => true,
 }));
 
+// Mock react-dropzone for FileInput stories — useDropzone hook works in jsdom
+// but we mock it to avoid any side effects from DataTransfer/FileReader APIs.
+vi.mock("react-dropzone", () => ({
+  useDropzone: ({
+    onDrop,
+    accept,
+    maxFiles,
+    maxSize,
+    disabled,
+  }: {
+    onDrop: (acceptedFiles: File[], rejectedFiles: any[]) => void;
+    accept?: Record<string, string[]>;
+    maxFiles?: number;
+    maxSize?: number;
+    disabled?: boolean;
+  }) => {
+    const getRootProps = () => ({
+      onDrop: (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        const files = Array.from(e.dataTransfer.files);
+        if (files.length > 0 && !disabled) {
+          onDrop(files, []);
+        }
+      },
+      onDragOver: (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = "copy";
+      },
+      onDragEnter: (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+      },
+      onClick: () => {},
+    });
+    const getInputProps = () => ({
+      type: "file",
+      accept: accept ? Object.keys(accept).join(",") : undefined,
+      multiple: maxFiles !== 1,
+      onChange: (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = e.target.files ? Array.from(e.target.files) : [];
+        if (files.length > 0 && !disabled) {
+          onDrop(files, []);
+        }
+      },
+      style: { display: "none" },
+    });
+    return { getRootProps, getInputProps, isDragActive: false };
+  },
+}));
+
 // ─── Story imports ────────────────────────────────────────────────────────────
 // Static imports so Vitest can tree-shake and type-check story files.
 
@@ -136,8 +185,11 @@ import BadgeMeta, * as BadgeStories from "@/components/ui/badge.stories";
 import ButtonMeta, * as ButtonStories from "@/components/ui/button.stories";
 import CardMeta, * as CardStories from "@/components/ui/card.stories";
 import DataTableMeta, * as DataTableStories from "@/components/ui/data-table.stories";
+import DatePickerMeta, * as DatePickerStories from "@/components/ui/date-picker.stories";
 import DialogMeta, * as DialogStories from "@/components/ui/dialog.stories";
+import DrawerMeta, * as DrawerStories from "@/components/ui/drawer.stories";
 import EmptyStateMeta, * as EmptyStateStories from "@/components/ui/EmptyState.stories";
+import FileInputMeta, * as FileInputStories from "@/components/ui/file-input.stories";
 import InputMeta, * as InputStories from "@/components/ui/input.stories";
 import PaginationMeta, * as PaginationStories from "@/components/ui/pagination.stories";
 import ProgressMeta, * as ProgressStories from "@/components/ui/progress.stories";
@@ -147,6 +199,7 @@ import SkeletonMeta, * as SkeletonStories from "@/components/ui/skeleton.stories
 import StatCardMeta, * as StatCardStories from "@/components/ui/stat-card.stories";
 import TextareaMeta, * as TextareaStories from "@/components/ui/textarea.stories";
 import TooltipMeta, * as TooltipStories from "@/components/ui/tooltip.stories";
+import BottomSheetMeta, * as BottomSheetStories from "@/components/ui/bottom-sheet.stories";
 import PositionDetailDrawerMeta, * as PositionDetailDrawerStories from "@/components/invoice/PositionDetailDrawer.stories";
 import VerificationModalMeta, * as VerificationModalStories from "@/components/wallet/VerificationModal.stories";
 import WalletBalanceMeta, * as WalletBalanceStories from "@/components/wallet/WalletBalance.stories";
@@ -317,6 +370,42 @@ describe("Storybook snapshots — UI primitives", () => {
     const stories = getStoryExports(DataTableStories as any);
     it.each(stories)("%s", (_name, story) => {
       const { container } = renderStory(story, DataTableMeta);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
+
+  // BottomSheet
+  describe("BottomSheet", () => {
+    const stories = getStoryExports(BottomSheetStories as any);
+    it.each(stories)("%s", (_name, story) => {
+      const { container } = renderStory(story, BottomSheetMeta);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
+
+  // Drawer
+  describe("Drawer", () => {
+    const stories = getStoryExports(DrawerStories as any);
+    it.each(stories)("%s", (_name, story) => {
+      const { container } = renderStory(story, DrawerMeta);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
+
+  // FileInput
+  describe("FileInput", () => {
+    const stories = getStoryExports(FileInputStories as any);
+    it.each(stories)("%s", (_name, story) => {
+      const { container } = renderStory(story, FileInputMeta);
+      expect(container.firstChild).toMatchSnapshot();
+    });
+  });
+
+  // DatePicker
+  describe("DatePicker", () => {
+    const stories = getStoryExports(DatePickerStories as any);
+    it.each(stories)("%s", (_name, story) => {
+      const { container } = renderStory(story, DatePickerMeta);
       expect(container.firstChild).toMatchSnapshot();
     });
   });

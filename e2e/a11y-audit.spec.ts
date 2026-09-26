@@ -139,6 +139,27 @@ test.describe("Accessibility audit — transactions (/transactions)", () => {
   });
 });
 
+// ─── Offline page ──────────────────────────────────────────────────────
+//
+// The offline page is a static fallback rendered when the browser has no
+// network connectivity.  It is fully server-rendered so there is no
+// client-side hydration mismatch, and all dynamic regions (pending tx
+// queue, stale-data badge) are progressive enhancements that degrade
+// gracefully.
+//
+// RTL note: the page inherits `dir="rtl"` from the <html> element when
+// the Arabic locale is active (LocaleProvider sets document.documentElement.dir).
+// No additional RTL-specific fixes are required — flexbox layouts and
+// the semantic heading/list structure work correctly in both directions.
+
+test.describe("Accessibility audit — offline page (/offline)", () => {
+  test("no critical or serious axe violations", async ({ page }) => {
+    await page.goto("/offline");
+    await page.waitForLoadState("networkidle");
+    await auditPage(page);
+  });
+});
+
 test.describe("Accessibility audit — transaction history drawer", () => {
   /** Open the drawer from the navbar trigger. */
   async function openDrawer(page: Parameters<typeof injectAxe>[0]) {
@@ -183,3 +204,88 @@ test.describe("Accessibility audit — transaction history drawer", () => {
     await dialog.waitFor({ state: "hidden" });
   });
 });
+
+// ─── PWA InstallPrompt (Issue #781) ──────────────────────────────────────────
+// The prompt is a fixed overlay that only renders after the `beforeinstallprompt`
+// event fires and the 7-day suppress window has not been set. It is therefore
+// not tied to a single route — route-level axe scans would miss it. Coverage
+// is provided in two layers:
+//   1) Vitest unit coverage in `__tests__/install-prompt.test.tsx` (visible vs
+//      dismissed states + accessible names on the Install / Not now / × actions
+//      and `aria-label` on the dialog).
+//   2) Storybook story `PWA/InstallPrompt` (`components/pwa/InstallPrompt.stories.tsx`)
+//      which can be audited with `@storybook/addon-a11y`.
+// The Playwright probe below proves the prompt can be made visible on demand
+// and still passes the critical/serious axe gate when it is.
+
+test.describe("Accessibility audit — PWA InstallPrompt (Issue #781)", () => {
+  test("no critical or serious axe violations when prompt is visible", async ({ page }) => {
+    await page.goto("/");
+    await page.waitForLoadState("networkidle");
+
+    // Make the prompt visible: clear suppress + force 2nd-visit path + dispatch event
+    await page.evaluate(() => {
+      try {
+        localStorage.removeItem("kora-pwa-install-dismissed-until");
+        localStorage.setItem("kora-pwa-visit-count", "2");
+      } catch {}
+      const evt = new Event("beforeinstallprompt") as unknown as Event & {
+        platforms: string[];
+        userChoice: Promise<{ outcome: string; platform: string }>;
+        prompt: () => Promise<void>;
+      };
+      // @ts-expect-error — synthetic shape for the prompt event
+      evt.platforms = ["web"];
+      // @ts-expect-error
+      evt.userChoice = Promise.resolve({ outcome: "accepted", platform: "web" });
+      // @ts-expect-error
+      evt.prompt = async () => {};
+      evt.preventDefault = () => {};
+      window.dispatchEvent(evt);
+    });
+
+    const prompt = page.getByTestId("install-prompt");
+    await prompt.waitFor({ state: "visible", timeout: 5000 });
+
+    // Primary actions must have accessible names (Issue #781)
+    await expect(page.getByRole("button", { name: /install/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /not now/i })).toBeVisible();
+
+    await auditPage(page);
+  });
+});
+
+// ─── Settings, Secondary, Offline, Create Invoice (Issue #757) ─────────────────
+
+test.describe("Accessibility audit — settings (/settings)", () => {
+  test("no critical or serious axe violations", async ({ page }) => {
+    await page.goto("/settings");
+    await page.waitForLoadState("networkidle");
+    await auditPage(page);
+  });
+});
+
+test.describe("Accessibility audit — secondary market (/secondary)", () => {
+  test("no critical or serious axe violations", async ({ page }) => {
+    await page.goto("/secondary");
+    await page.waitForLoadState("networkidle");
+    await auditPage(page);
+  });
+});
+
+test.describe("Accessibility audit — offline (/offline)", () => {
+  test("no critical or serious axe violations", async ({ page }) => {
+    await page.goto("/offline");
+    await page.waitForLoadState("networkidle");
+    await auditPage(page);
+  });
+});
+
+test.describe("Accessibility audit — create invoice (/invoice/create)", () => {
+  test("no critical or serious axe violations", async ({ page }) => {
+    await page.goto("/invoice/create");
+    await page.waitForLoadState("networkidle");
+    await auditPage(page);
+  });
+});
+
