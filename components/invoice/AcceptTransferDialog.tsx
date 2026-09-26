@@ -20,7 +20,7 @@ import type { Invoice } from "@/types/invoice";
 interface AcceptTransferDialogProps {
   item: {
     positionId: string;
-    invoice: Invoice | any;
+    invoice: Invoice;
     expectedReturn: number;
     sellerAddress: string;
     remainingTenor: number;

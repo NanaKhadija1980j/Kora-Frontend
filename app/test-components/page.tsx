@@ -18,6 +18,7 @@
  */
 
 import * as React from "react";
+import { redirect } from "next/navigation";
 import { FileInput } from "@/components/ui/file-input";
 import { RangeSlider } from "@/components/ui/range-slider";
 import { DatePicker } from "@/components/ui/date-picker";
@@ -106,16 +107,12 @@ function DatePickerFixture() {
 // ── Page ─────────────────────────────────────────────────────────────────────
 
 export default function TestComponentsPage() {
-  // Safety guard: only render in non-production environments
+  // Safety guard: redirect away in production unless dev flag is enabled (#725)
   if (
-    process.env.NEXT_PUBLIC_ENABLE_MOCK_DATA !== "true" &&
-    process.env.NODE_ENV === "production"
+    process.env.NODE_ENV === "production" &&
+    process.env.NEXT_PUBLIC_ENABLE_TEST_COMPONENTS !== "true"
   ) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-zinc-500 text-sm">
-        Not available in production.
-      </div>
-    );
+    redirect("/");
   }
 
   return (

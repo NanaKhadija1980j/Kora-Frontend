@@ -30,8 +30,24 @@ import userEvent from "@testing-library/user-event";
 import { CommandPalette } from "@/components/command/CommandPalette";
 import { createMockInvoice } from "@/__tests__/fixtures";
 import type { RecentItem } from "@/hooks/useCommandPalette";
+import enMessages from "@/messages/en.json";
 
 // ── Mocks ──────────────────────────────────────────────────────────────────────
+
+vi.mock("next-intl", () => ({
+  useTranslations: (namespace?: string) => {
+    const ns = namespace ? (enMessages as Record<string, any>)[namespace] : enMessages;
+    return (key: string, values?: Record<string, string>) => {
+      let str = ns?.[key] ?? key;
+      if (values) {
+        for (const [k, v] of Object.entries(values)) {
+          str = str.replace(`{${k}}`, v);
+        }
+      }
+      return str;
+    };
+  },
+}));
 
 const pushMock = vi.fn();
 vi.mock("next/navigation", () => ({
@@ -39,6 +55,21 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/",
   useSearchParams: () => new URLSearchParams(),
   useParams: () => ({}),
+}));
+
+let localeSynonyms = [
+  "connect wallet",
+  "create invoice",
+  "disconnect wallet",
+  "shortcuts",
+  "keyboard shortcuts",
+];
+
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string) => {
+    if (key === "synonyms") return localeSynonyms;
+    return key;
+  },
 }));
 
 let paletteOpen = true;
@@ -435,5 +466,89 @@ describe("CommandPalette — shortcuts action", () => {
     await typeQuery(user, "shortcut");
 
     expect(screen.getByTestId("action-shortcuts")).toBeInTheDocument();
+  });
+});
+
+// ── i18n: localized action synonyms ──────────────────────────────────
+
+describe("CommandPalette — localized action synonyms", () => {
+  beforeEach(() => {
+    localeSynonyms = [
+      "connect wallet",
+      "create invoice",
+      "disconnect wallet",
+      "shortcuts",
+      "keyboard shortcuts",
+    ];
+  });
+
+  afterEach(() => {
+    localeSynonyms = [
+      "connect wallet",
+      "create invoice",
+      "disconnect wallet",
+      "shortcuts",
+      "keyboard shortcuts",
+    ];
+  });
+
+  it("matches Connect Wallet via Spanish synonym", async () => {
+    localeSynonyms = ["conectar billetera", "crear factura", "desconectar billetera", "atajos", "atajos de teclado"];
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(<CommandPalette />);
+
+    await typeQuery(user, "conectar");
+
+    expect(screen.getByTestId("action-connect-wallet")).toBeInTheDocument();
+  });
+
+  it("matches Create Invoice via Spanish synonym", async () => {
+    localeSynonyms = ["conectar billetera", "crear factura", "desconectar billetera", "atajos", "atajos de teclado"];
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(<CommandPalette />);
+
+    await typeQuery(user, "crear");
+
+    expect(screen.getByTestId("action-create-invoice")).toBeInTheDocument();
+  });
+
+  it("matches Disconnect Wallet via Spanish synonym", async () => {
+    localeSynonyms = ["conectar billetera", "crear factura", "desconectar billetera", "atajos", "atajos de teclado"];
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(<CommandPalette />);
+
+    await typeQuery(user, "desconectar");
+
+    expect(screen.getByTestId("action-disconnect-wallet")).toBeInTheDocument();
+  });
+
+  it("matches Shortcuts via Arabic synonym", async () => {
+    localeSynonyms = ["ربط المحفظة", "إنشاء فاتورة", "فصل المحفظة", "اختصارات", "اختصارات لوحة المفاتيح"];
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(<CommandPalette />);
+
+    await typeQuery(user, "اختصارات");
+
+    expect(screen.getByTestId("action-shortcuts")).toBeInTheDocument();
+  });
+
+  it("matches Connect Wallet via Portuguese synonym", async () => {
+    localeSynonyms = ["conectar carteira", "criar fatura", "desconectar carteira", "atalhos", "atalhos de teclado"];
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(<CommandPalette />);
+
+    await typeQuery(user, "conectar");
+
+    expect(screen.getByTestId("action-connect-wallet")).toBeInTheDocument();
+  });
+
+  it("hides actions when query matches no localized synonym", async () => {
+    localeSynonyms = ["conectar billetera", "crear factura", "desconectar billetera", "atajos", "atajos de teclado"];
+    const user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
+    render(<CommandPalette />);
+
+    await typeQuery(user, "xyznonexistent");
+
+    expect(screen.queryByTestId("action-connect-wallet")).not.toBeInTheDocument();
   });
 });

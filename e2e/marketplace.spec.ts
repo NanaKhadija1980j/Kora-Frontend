@@ -309,3 +309,133 @@ test.describe("Marketplace — Investor funding flow", () => {
     ).toBeHidden();
   });
 });
+
+// ── Marketplace — Category Taxonomy Preview (Flag Enabled) ───────────────────────
+
+test.describe("Marketplace — Category Taxonomy Preview (Flag Enabled)", () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem("kora-tour-done", "true");
+      localStorage.setItem("kora-changelog-seen-version", "0.1.0");
+      localStorage.setItem(
+        "kora:feature-flag-overrides",
+        JSON.stringify({ "category-taxonomy-preview": true })
+      );
+    });
+    await page.goto("/marketplace");
+    // Wait for the page to hydrate and show invoice cards
+    await page.waitForSelector("a[href^='/marketplace/']", { timeout: 15_000 });
+  });
+
+  test("renders taxonomy preview trigger button when flag is enabled", async ({ page }) => {
+    const triggerButton = page.getByRole("button", { name: /Taxonomy Preview/i });
+    await expect(triggerButton).toBeVisible();
+    await expect(triggerButton).toContainText("Taxonomy Preview");
+  });
+
+  test("opens taxonomy preview modal when trigger button is clicked", async ({ page }) => {
+    const triggerButton = page.getByRole("button", { name: /Taxonomy Preview/i });
+    await triggerButton.click();
+
+    const dialog = page.getByRole("dialog", { name: /Category Taxonomy Preview/i });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByText("Category Taxonomy Preview")).toBeVisible();
+    await expect(dialog.getByText("Dev Preview")).toBeVisible();
+  });
+
+  test("shows taxonomy metrics cards", async ({ page }) => {
+    const triggerButton = page.getByRole("button", { name: /Taxonomy Preview/i });
+    await triggerButton.click();
+
+    const dialog = page.getByRole("dialog", { name: /Category Taxonomy Preview/i });
+    await expect(dialog.getByText("Total Categories")).toBeVisible();
+    await expect(dialog.getByText("Active in Inventory")).toBeVisible();
+    await expect(dialog.getByText("Unused Categories")).toBeVisible();
+    await expect(dialog.getByText("Missing Translations")).toBeVisible();
+  });
+
+  test("filters categories by search input", async ({ page }) => {
+    const triggerButton = page.getByRole("button", { name: /Taxonomy Preview/i });
+    await triggerButton.click();
+
+    const dialog = page.getByRole("dialog", { name: /Category Taxonomy Preview/i });
+    const searchInput = dialog.getByPlaceholder(/Search taxonomy keys or labels/i);
+    await expect(searchInput).toBeVisible();
+
+    await searchInput.fill("techno");
+    await page.waitForTimeout(200);
+
+    await expect(dialog.getByText("technology")).toBeVisible();
+    await expect(dialog.getByText("agriculture")).not.toBeVisible();
+  });
+
+  test("filters by active vs unused category filter buttons", async ({ page }) => {
+    const triggerButton = page.getByRole("button", { name: /Taxonomy Preview/i });
+    await triggerButton.click();
+
+    const dialog = page.getByRole("dialog", { name: /Category Taxonomy Preview/i });
+
+    // Click "Active Only" filter
+    const activeFilterBtn = dialog.getByRole("button", { name: /Active Only/i });
+    await activeFilterBtn.click();
+    await page.waitForTimeout(200);
+
+    // Active categories should be visible
+    // (at least one invoice category from mock data should have count > 0)
+
+    // Click "Unused Only" filter
+    const unusedFilterBtn = dialog.getByRole("button", { name: /Unused Only/i });
+    await unusedFilterBtn.click();
+    await page.waitForTimeout(200);
+
+    // Unused categories should be visible
+    await expect(dialog.getByText("Unused Only")).toBeVisible();
+  });
+
+  test("closes modal when close button is clicked", async ({ page }) => {
+    const triggerButton = page.getByRole("button", { name: /Taxonomy Preview/i });
+    await triggerButton.click();
+
+    const dialog = page.getByRole("dialog", { name: /Category Taxonomy Preview/i });
+    await expect(dialog).toBeVisible();
+
+    // Click close button (X icon)
+    const closeButton = dialog.getByRole("button", { name: /Close Preview/i });
+    await closeButton.click();
+
+    await expect(dialog).toBeHidden();
+  });
+
+  test("copy taxonomy JSON button works", async ({ page }) => {
+    const triggerButton = page.getByRole("button", { name: /Taxonomy Preview/i });
+    await triggerButton.click();
+
+    const dialog = page.getByRole("dialog", { name: /Category Taxonomy Preview/i });
+    const copyButton = dialog.getByRole("button", { name: /Copy Taxonomy JSON/i });
+    await expect(copyButton).toBeVisible();
+
+    // Grant clipboard permission
+    await page.context().grantPermissions(["clipboard-read", "clipboard-write"]);
+
+    await copyButton.click();
+    await expect(dialog.getByText("Copied to clipboard!")).toBeVisible();
+  });
+});
+
+test.describe("Marketplace — Category Taxonomy Preview (Flag Disabled)", () => {
+  test("does not render trigger button when flag is disabled", async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem("kora-tour-done", "true");
+      localStorage.setItem("kora-changelog-seen-version", "0.1.0");
+      localStorage.setItem(
+        "kora:feature-flag-overrides",
+        JSON.stringify({ "category-taxonomy-preview": false })
+      );
+    });
+    await page.goto("/marketplace");
+    await page.waitForSelector("a[href^='/marketplace/']", { timeout: 15_000 });
+
+    const triggerButton = page.getByRole("button", { name: /Taxonomy Preview/i });
+    await expect(triggerButton).not.toBeVisible();
+  });
+});

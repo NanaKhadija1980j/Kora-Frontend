@@ -22,6 +22,7 @@ import {
 } from "@/lib/utils";
 import { Download, Info } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 import { useFormatters } from "@/hooks/useFormatters";
 import { useLocale } from "@/i18n/LocaleProvider";
 import { isRTL } from "@/i18n/config";
@@ -33,6 +34,7 @@ export interface YieldProjectionCalculatorProps {
 }
 
 export function YieldProjectionCalculator({ defaultTier = "A" }: YieldProjectionCalculatorProps = {}) {
+  const t = useTranslations("yieldProjection");
   const [amount, setAmount] = useState<number>(10000);
   const [tier, setTier] = useState<string>(defaultTier);
   const [horizon, setHorizon] = useState<number>(12);
@@ -86,13 +88,13 @@ export function YieldProjectionCalculator({ defaultTier = "A" }: YieldProjection
           downloadLink.click();
           document.body.removeChild(downloadLink);
           URL.revokeObjectURL(url);
-          toast.success("Projection exported as PNG");
+          toast.success(t("exportSuccess"));
         }
       };
       img.src = url;
     } catch (error) {
       console.error("Export failed:", error);
-      toast.error("Failed to export chart");
+      toast.error(t("exportError"));
     }
   };
 

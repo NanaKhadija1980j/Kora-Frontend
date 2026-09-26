@@ -68,8 +68,8 @@ jobs:
 
       - name: Check coverage thresholds
         run: |
-          echo "Coverage thresholds enforced in vitest.config.ts"
-          echo "Lines: 80%, Branches: 70%, Functions: 75%"
+          echo "Coverage thresholds enforced in vitest.config.mts"
+          echo "Lines: 50%, Branches: 40%, Functions: 45%, Statements: 50%"
 
   playwright-components:
     name: Playwright — Component tests

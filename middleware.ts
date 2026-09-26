@@ -37,6 +37,19 @@ function buildNonceCsp(nonce: string): string {
 }
 
 export function middleware(req: NextRequest) {
+  // ── Gate /test-components behind dev-only guard (#725) ─────────────────────
+  if (
+    req.nextUrl.pathname === "/test-components" ||
+    req.nextUrl.pathname.startsWith("/test-components/")
+  ) {
+    const isDev = process.env.NODE_ENV !== "production";
+    const isFlagEnabled =
+      process.env.NEXT_PUBLIC_ENABLE_TEST_COMPONENTS === "true";
+    if (!isDev && !isFlagEnabled) {
+      return NextResponse.redirect(new URL("/", req.url));
+    }
+  }
+
   // ── X-Request-ID (#277) ───────────────────────────────────────────────────
   const requestId = crypto.randomUUID();
   const requestHeaders = new Headers(req.headers);

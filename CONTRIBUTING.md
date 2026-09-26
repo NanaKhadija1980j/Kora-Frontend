@@ -12,6 +12,7 @@ This guide is written for first-time contributors. Follow it from top to bottom 
 - [Mock Data Mode](#mock-data-mode)
 - [Daily Development Commands](#daily-development-commands)
 - [Storybook](#storybook)
+- [Component Test Fixtures](#component-test-fixtures)
 - [Internationalization (i18n)](#internationalization-i18n)
 - [Your First Issue](#your-first-issue)
 - [Branch Naming](#branch-naming)
@@ -158,6 +159,12 @@ npx vitest run __tests__/stories.snapshot.test.tsx --updateSnapshot
 ```
 
 The generated snapshots are stored in `__tests__/__snapshots__/` and must be committed to the repository.
+
+## Component Test Fixtures
+
+For local QA and isolated component testing (such as Playwright component tests for `FileInput`, `RangeSlider`, and `DatePicker`), an isolated test fixture page is available at `/test-components`.
+
+This route is development-only (`NODE_ENV !== "production"` or when `NEXT_PUBLIC_ENABLE_TEST_COMPONENTS="true"`). In production builds, requests to `/test-components` are automatically redirected to the home page (`/`).
 
 ## Internationalization (i18n)
 

@@ -201,8 +201,36 @@
       "openPreview": "Vista Previa de Taxonomía",
       "sources": "Fuentes",
       "filterSource": "Filtros de Mercado",
-      "schemaSource": "Esquema de Metadatos"
-    }
+      "schemaSource": "Esquema de Metadatos",
+      "marketplaceSource": "Marketplace"
+    },
+    "comparison": {
+      "barAriaLabel": "Barra de comparación de facturas",
+      "compare": "Comparar",
+      "loading": "Cargando {id}…",
+      "add": "+ Agregar",
+      "shareAriaLabel": "Copiar enlace de comparación compartible",
+      "share": "Compartir",
+      "copied": "¡Copiado!",
+      "clearAriaLabel": "Limpiar todas las comparaciones",
+      "selectAtLeastTwo": "Selecciona al menos 2 facturas para comparar",
+      "openTable": "Abrir tabla de comparación"
+    },
+    "watchlist": {
+      "ariaLabel": "Lista de seguimiento de facturas",
+      "closeAriaLabel": "Cerrar lista de seguimiento",
+      "title": "Lista de seguimiento",
+      "watchedCount": "{count, plural, one {# factura seguida} other {# facturas seguidas}}",
+      "emptyState": "Marca una factura con estrella para seguirla aquí.",
+      "raised": "recaudado",
+      "unstar": "Quitar estrella de {invoiceNumber}",
+      "alertPreferences": "Preferencias de alertas",
+      "fundingProgress": "Progreso de financiamiento",
+      "statusChanges": "Cambios de estado",
+      "aprChanges": "Cambios de TAE",
+      "alertsPaused": "Las alertas están pausadas."
+    },
+    "searchAria": "Buscar en el mercado"
   },
   "invoiceDetail": {
     "backToMarketplace": "Volver al Mercado",
@@ -541,7 +569,53 @@
     "statusFilterAria": "Filtrar por estado",
     "statusLabels": {
       "confirmed": "Confirmada",
-      "failed": "Fallida"
+      "failed": "Fallida",
+      "pending": "Pendiente"
+    },
+    "typeLabels": {
+      "mint_invoice": "Acuñar Factura",
+      "fund_invoice": "Financiar Factura",
+      "repay_invoice": "Pagar Factura",
+      "claim_yield": "Reclamar Rendimiento",
+      "transfer": "Transferir",
+      "other": "Transacción"
+    },
+    "drawer": {
+      "title": "Transacciones",
+      "closeAria": "Cerrar historial de transacciones",
+      "filters": "Filtros",
+      "reset": "Restablecer",
+      "filterByTypeAria": "Filtrar por tipo",
+      "startDatePlaceholder": "Fecha inicial",
+      "startDateFilterAria": "Filtro de fecha inicial",
+      "endDatePlaceholder": "Fecha final",
+      "endDateFilterAria": "Filtro de fecha final",
+      "emptyTitle": "Sin transacciones aún",
+      "emptyDesc": "Las transacciones aparecerán aquí",
+      "noResultsTitle": "Sin resultados",
+      "noResultsDesc": "Intenta ajustar tus filtros",
+      "export": "Exportar",
+      "exportAria": "Exportar transacciones a CSV",
+      "clearAria": "Limpiar historial de transacciones",
+      "clearConfirm": "¿Limpiar todo el historial de transacciones? Esta acción no se puede deshacer.",
+      "detailsTitle": "Detalles de la Transacción",
+      "closeDetailsAria": "Cerrar detalles de la transacción",
+      "type": "Tipo",
+      "txHash": "Hash de Transacción",
+      "copyHashAria": "Copiar hash",
+      "status": "Estado",
+      "amount": "Monto",
+      "dateTime": "Fecha y Hora",
+      "onChainDetails": "Detalles en Cadena",
+      "ledger": "Libro Mayor",
+      "feePaid": "Tarifa Pagada",
+      "confirmedAt": "Confirmado en",
+      "operations": "Operaciones",
+      "memo": "Memo",
+      "detailsUnavailable": "Detalles no disponibles",
+      "description": "Descripción",
+      "error": "Error",
+      "viewExplorer": "Ver en Explorer"
     }
   },
   "analytics": {
@@ -581,6 +655,23 @@
       "button": "Resumen PDF",
       "title": "Resumen de cartera",
       "share": "Compartir resumen"
+    },
+    "a11y": {
+      "filterJurisdiction": "Filtrar por jurisdicción",
+      "filterCategory": "Filtrar por categoría",
+      "clearFilters": "Limpiar todos los filtros",
+      "exportPortfolio": "Exportar datos de portafolio",
+      "exportYield": "Exportar datos de rendimiento",
+      "exportRisk": "Exportar datos de riesgo",
+      "exportReturn": "Exportar datos de retorno",
+      "exportVariance": "Exportar CSV de variación",
+      "exportSellerMetrics": "Exportar métricas de vendedor como CSV",
+      "sellerMetricsTable": "Tabla de métricas de vendedor",
+      "downloadDigest": "Descargar resumen de portafolio en PDF",
+      "resetFilters": "Restablecer filtros",
+      "exportData": "Exportar datos de {label}",
+      "fromDate": "Fecha desde",
+      "toDate": "Fecha hasta"
     }
   },
   "repaymentDialog": {
@@ -690,7 +781,32 @@
     "invoiceCreation": "Creación y acuñación de facturas",
     "liveData": "Datos en vivo del mercado",
     "reload": "Intentar de Nuevo",
-    "browseCached": "Explorar listados en caché"
+    "browseCached": "Explorar listados en caché",
+    "pendingQueueTitle": "Transacciones Firmadas Pendientes",
+    "pendingQueueDesc": "Estas transacciones fueron firmadas pero no se pudieron enviar. Se reintentarán automáticamente cuando te reconectes."
+  },
+  "pendingQueue": {
+    "title": "{count, plural, one {# transacción pendiente} other {# transacciones pendientes}}",
+    "emptyState": "No hay transacciones pendientes: todos los sobres firmados se han enviado.",
+    "retryAll": "Reintentar todo",
+    "retryAriaLabel": "Reintentar esta transacción",
+    "removeAriaLabel": "Descartar esta transacción",
+    "offlineAriaLabel": "Esperando conexión",
+    "listAriaLabel": "Transacciones firmadas pendientes",
+    "waitingOnline": "Esperando…",
+    "retrySuccess": "Transacción enviada con éxito",
+    "retryFailed": "Error al enviar: se reintentará cuando esté en línea",
+    "removed": "Borrador eliminado de la cola",
+    "txType": "{type}",
+    "unknownTx": "Transacción firmada",
+    "invoiceLabel": "Factura #{id}",
+    "queuedAt": "En cola {time}",
+    "attempts": "{count, plural, one {# intento} other {# intentos}}",
+    "statusRetrying": "Reintentando",
+    "statusSuccess": "Enviado",
+    "statusError": "Fallido",
+    "statusPending": "En cola",
+    "badgeAriaLabel": "{count} transacción(es) pendiente(s)"
   },
   "notFound": {
     "title": "Página no encontrada",
@@ -724,7 +840,10 @@
     "retry": "Reintentar",
     "dismiss": "Descartar",
     "processing": "Procesando…",
-    "noResults": "Sin resultados para \"{query}\""
+    "noResults": "Sin resultados para \"{query}\"",
+    "selectOption": "Seleccionar opción...",
+    "selectDate": "Seleccionar fecha...",
+    "searchOptions": "Buscar opciones..."
   },
   "verification": {
     "title": "Verificar Propiedad de Billetera",
@@ -818,7 +937,9 @@
     "hintSettings": "Configuración de Notificaciones",
     "navigate": "navegar",
     "select": "seleccionar",
-    "close": "cerrar"
+    "close": "cerrar",
+    "searchPlaceholder": "Buscar atajos",
+    "searchAriaLabel": "Buscar atajos"
   },
   "commandPalette": {
     "ariaLabel": "Paleta de comandos",
@@ -834,7 +955,23 @@
     "createInvoice": "Crear Factura",
     "navigate": "navegar",
     "select": "seleccionar",
-    "close": "cerrar"
+    "close": "cerrar",
+    "disconnectWallet": "Desconectar Billetera",
+    "shortcuts": "Atajos",
+    "resultsLabel": "Resultados de comandos",
+    "pageMarketplace": "Mercado",
+    "pageSecondary": "Mercado Secundario",
+    "pageInvest": "Panel del Inversor",
+    "pageSme": "Mis Facturas",
+    "pageTransactions": "Historial de Transacciones",
+    "pageAnalytics": "Analíticas",
+    "synonyms": [
+      "conectar billetera",
+      "crear factura",
+      "desconectar billetera",
+      "atajos",
+      "atajos de teclado"
+    ]
   },
   "feedback": {
     "sendFeedback": "Enviar Comentarios",
@@ -1177,5 +1314,9 @@
     "openChangelogLabel": "Abrir registro de cambios",
     "openChangelogUnreadLabel": "Abrir registro de cambios (nueva versión disponible)",
     "copyright": "© {year} Kora Protocol"
+  },
+  "yieldProjection": {
+    "exportSuccess": "Proyección exportada como PNG",
+    "exportError": "Error al exportar el gráfico"
   }
 }

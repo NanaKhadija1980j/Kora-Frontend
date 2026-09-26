@@ -139,6 +139,27 @@ test.describe("Accessibility audit — transactions (/transactions)", () => {
   });
 });
 
+// ─── Offline page ──────────────────────────────────────────────────────
+//
+// The offline page is a static fallback rendered when the browser has no
+// network connectivity.  It is fully server-rendered so there is no
+// client-side hydration mismatch, and all dynamic regions (pending tx
+// queue, stale-data badge) are progressive enhancements that degrade
+// gracefully.
+//
+// RTL note: the page inherits `dir="rtl"` from the <html> element when
+// the Arabic locale is active (LocaleProvider sets document.documentElement.dir).
+// No additional RTL-specific fixes are required — flexbox layouts and
+// the semantic heading/list structure work correctly in both directions.
+
+test.describe("Accessibility audit — offline page (/offline)", () => {
+  test("no critical or serious axe violations", async ({ page }) => {
+    await page.goto("/offline");
+    await page.waitForLoadState("networkidle");
+    await auditPage(page);
+  });
+});
+
 test.describe("Accessibility audit — transaction history drawer", () => {
   /** Open the drawer from the navbar trigger. */
   async function openDrawer(page: Parameters<typeof injectAxe>[0]) {
@@ -183,3 +204,38 @@ test.describe("Accessibility audit — transaction history drawer", () => {
     await dialog.waitFor({ state: "hidden" });
   });
 });
+
+// ─── Settings, Secondary, Offline, Create Invoice (Issue #757) ─────────────────
+
+test.describe("Accessibility audit — settings (/settings)", () => {
+  test("no critical or serious axe violations", async ({ page }) => {
+    await page.goto("/settings");
+    await page.waitForLoadState("networkidle");
+    await auditPage(page);
+  });
+});
+
+test.describe("Accessibility audit — secondary market (/secondary)", () => {
+  test("no critical or serious axe violations", async ({ page }) => {
+    await page.goto("/secondary");
+    await page.waitForLoadState("networkidle");
+    await auditPage(page);
+  });
+});
+
+test.describe("Accessibility audit — offline (/offline)", () => {
+  test("no critical or serious axe violations", async ({ page }) => {
+    await page.goto("/offline");
+    await page.waitForLoadState("networkidle");
+    await auditPage(page);
+  });
+});
+
+test.describe("Accessibility audit — create invoice (/invoice/create)", () => {
+  test("no critical or serious axe violations", async ({ page }) => {
+    await page.goto("/invoice/create");
+    await page.waitForLoadState("networkidle");
+    await auditPage(page);
+  });
+});
+
