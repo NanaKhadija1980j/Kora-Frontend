@@ -59,7 +59,10 @@
     "confirmed": "تم تأكيد المعاملة!",
     "failed": "فشلت المعاملة",
     "retry": "إعادة المحاولة",
-    "dismiss": "تجاهل"
+    "dismiss": "تجاهل",
+    "cancelSigningSafely": "إلغاء التوقيع بأمان",
+    "addExtraTime": "إضافة وقت إضافي للمحفظة البطيئة",
+    "cancelTransactionSigningSafely": "إلغاء توقيع المعاملة بأمان"
   },
   "landing": {
     "headline": "تمويل الفواتير على السلسلة",
