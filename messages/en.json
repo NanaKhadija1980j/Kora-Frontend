@@ -59,7 +59,10 @@
     "confirmed": "Transaction confirmed!",
     "failed": "Transaction failed",
     "retry": "Retry",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "cancelSigningAria": "Cancel signing safely",
+    "cancelTxSigningAria": "Cancel transaction signing safely",
+    "extraTimeAria": "Add extra time for slow wallet"
   },
   "landing": {
     "headline": "Invoice Financing, On-Chain",
@@ -1318,5 +1321,18 @@
   "yieldProjection": {
     "exportSuccess": "Projection exported as PNG",
     "exportError": "Failed to export chart"
+  },
+  "pagination": {
+    "navAria": "Pagination",
+    "pageSizeAria": "Page size options",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "goToPage": "Go to page {page}"
+  },
+  "dataTable": {
+    "selectAllAria": "Select all rows on this page",
+    "selectRowAria": "Select row {id}",
+    "sortByAria": "Sort by {column}",
+    "openDetailsAria": "Open details for {id}"
   }
 }

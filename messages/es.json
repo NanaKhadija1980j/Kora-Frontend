@@ -59,7 +59,10 @@
     "confirmed": "¡Transacción confirmada!",
     "failed": "Transacción fallida",
     "retry": "Reintentar",
-    "dismiss": "Descartar"
+    "dismiss": "Descartar",
+    "cancelSigningAria": "Cancelar la firma de forma segura",
+    "cancelTxSigningAria": "Cancelar la firma de la transacción de forma segura",
+    "extraTimeAria": "Añadir tiempo extra para billeteras lentas"
   },
   "landing": {
     "headline": "Financiamiento de Facturas, En Cadena",
@@ -1318,5 +1321,18 @@
   "yieldProjection": {
     "exportSuccess": "Proyección exportada como PNG",
     "exportError": "Error al exportar el gráfico"
+  },
+  "pagination": {
+    "navAria": "Paginación",
+    "pageSizeAria": "Opciones de tamaño de página",
+    "previousPage": "Página anterior",
+    "nextPage": "Página siguiente",
+    "goToPage": "Ir a la página {page}"
+  },
+  "dataTable": {
+    "selectAllAria": "Seleccionar todas las filas de esta página",
+    "selectRowAria": "Seleccionar fila {id}",
+    "sortByAria": "Ordenar por {column}",
+    "openDetailsAria": "Abrir detalles de {id}"
   }
 }

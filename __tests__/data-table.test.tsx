@@ -1,7 +1,27 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import React from "react";
+import { render as rtlRender, screen, fireEvent } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { NextIntlClientProvider } from "next-intl";
+import en from "../messages/en.json";
 import { DataTable } from "../components/ui/data-table";
 import { useSearchParams, useRouter } from "next/navigation";
+
+const mockRouter = { push: vi.fn() };
+vi.mock("next/navigation", () => ({
+  useRouter: () => mockRouter,
+  usePathname: () => "/dashboard",
+  useSearchParams: vi.fn(() => new URLSearchParams()),
+}));
+
+function render(ui: React.ReactElement) {
+  return rtlRender(ui, {
+    wrapper: ({ children }) => (
+      <NextIntlClientProvider locale="en" messages={en}>
+        {children}
+      </NextIntlClientProvider>
+    ),
+  });
+}
 
 // Mock useBreakpoint to control viewport width in tests
 const mockUseBreakpoint = vi.fn();
@@ -105,6 +125,7 @@ describe("DataTable mobile card view", () => {
       <DataTable
         data={testData}
         columns={testColumns}
+        enableSelection
         syncToUrl={false}
       />
     );
@@ -127,5 +148,37 @@ describe("DataTable mobile card view", () => {
     );
 
     expect(screen.getByRole("table")).toBeInTheDocument();
+  });
+});
+
+describe("DataTable & Pagination localized aria labels", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseBreakpoint.mockReturnValue({ isMobile: false, width: 1024 });
+    vi.mocked(useSearchParams).mockReturnValue(new URLSearchParams());
+  });
+
+  it("renders select-all, select-row and sort labels from messages", () => {
+    render(<DataTable data={testData} columns={testColumns} enableSelection />);
+
+    expect(screen.getByRole("checkbox", { name: "Select all rows on this page" })).toBeInTheDocument();
+    expect(screen.getByRole("checkbox", { name: "Select row 1" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Sort by Value" })).toBeInTheDocument();
+  });
+
+  it("renders the row details label from messages", () => {
+    render(<DataTable data={testData} columns={testColumns} onRowClick={vi.fn()} />);
+
+    expect(screen.getByRole("row", { name: "Open details for 2" })).toBeInTheDocument();
+  });
+
+  it("renders pagination labels from messages", () => {
+    render(<DataTable data={testData} columns={testColumns} pageSize={1} />);
+
+    expect(screen.getByRole("navigation", { name: "Pagination" })).toBeInTheDocument();
+    expect(screen.getByRole("combobox", { name: "Page size options" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Previous page" })).toBeDisabled();
+    expect(screen.getByRole("button", { name: "Next page" })).toBeEnabled();
+    expect(screen.getByRole("button", { name: "Go to page 2" })).toBeInTheDocument();
   });
 });

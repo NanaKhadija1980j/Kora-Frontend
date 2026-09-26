@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Loader2,
@@ -33,6 +34,7 @@ import { Badge } from "@/components/ui/badge";
  * hardware wallet extended timeouts, and secondary market escrow flows.
  */
 export function InProgressOverlay() {
+  const t = useTranslations("transaction");
   const { txState, setTxState, resetTxState } = useUIStore();
   const provider = useWalletStore((s) => s.provider);
   const { escrowState, retryEscrow, resetEscrow } = useSecondaryEscrowFlow();
@@ -423,7 +425,7 @@ export function InProgressOverlay() {
                   <button
                     type="button"
                     onClick={handleCancel}
-                    aria-label="Cancel signing safely"
+                    aria-label={t("cancelSigningAria")}
                     className={cn(
                       "w-full px-4 py-2 rounded-lg font-medium text-xs transition-all",
                       "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground",
@@ -518,7 +520,7 @@ export function InProgressOverlay() {
                   <button
                     type="button"
                     onClick={() => extendTimeout(60_000)}
-                    aria-label="Add extra time for slow wallet"
+                    aria-label={t("extraTimeAria")}
                     className={cn(
                       "flex-1 px-3 py-2 rounded-lg font-medium text-xs transition-all",
                       "bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -531,7 +533,7 @@ export function InProgressOverlay() {
                   <button
                     type="button"
                     onClick={handleCancel}
-                    aria-label="Cancel transaction signing safely"
+                    aria-label={t("cancelTxSigningAria")}
                     className={cn(
                       "flex-1 px-3 py-2 rounded-lg font-medium text-xs transition-all",
                       "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground",

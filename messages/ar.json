@@ -59,7 +59,10 @@
     "confirmed": "تم تأكيد المعاملة!",
     "failed": "فشلت المعاملة",
     "retry": "إعادة المحاولة",
-    "dismiss": "تجاهل"
+    "dismiss": "تجاهل",
+    "cancelSigningAria": "إلغاء التوقيع بأمان",
+    "cancelTxSigningAria": "إلغاء توقيع المعاملة بأمان",
+    "extraTimeAria": "إضافة وقت إضافي للمحفظة البطيئة"
   },
   "landing": {
     "headline": "تمويل الفواتير على السلسلة",
@@ -1318,5 +1321,18 @@
   "yieldProjection": {
     "exportSuccess": "تم تصدير التوقعات كملف PNG",
     "exportError": "فشل تصدير المخطط"
+  },
+  "pagination": {
+    "navAria": "ترقيم الصفحات",
+    "pageSizeAria": "خيارات حجم الصفحة",
+    "previousPage": "الصفحة السابقة",
+    "nextPage": "الصفحة التالية",
+    "goToPage": "الانتقال إلى الصفحة {page}"
+  },
+  "dataTable": {
+    "selectAllAria": "تحديد جميع الصفوف في هذه الصفحة",
+    "selectRowAria": "تحديد الصف {id}",
+    "sortByAria": "الفرز حسب {column}",
+    "openDetailsAria": "فتح تفاصيل {id}"
   }
 }

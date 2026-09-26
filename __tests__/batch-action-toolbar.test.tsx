@@ -11,10 +11,23 @@
  */
 
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, waitFor } from "@testing-library/react";
+import { render as rtlRender, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import React from "react";
+import { NextIntlClientProvider } from "next-intl";
+import en from "@/messages/en.json";
 import { BatchActionToolbar } from "@/components/dashboard/BatchActionToolbar";
+import type { BatchQueueItem } from "@/lib/batch/txQueue";
+
+function render(ui: React.ReactElement) {
+  return rtlRender(ui, {
+    wrapper: ({ children }) => (
+      <NextIntlClientProvider locale="en" messages={en}>
+        {children}
+      </NextIntlClientProvider>
+    ),
+  });
+}
 
 // ─── Unit tests for BatchActionToolbar component ──────────────────────────────
 
@@ -96,6 +109,138 @@ describe("BatchActionToolbar", () => {
     );
     expect(screen.queryByText(/Cancel Invoices/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Export CSV/i)).not.toBeInTheDocument();
+  });
+});
+
+// ─── Enable/disable and batch callback actions (#821) ─────────────────────────
+
+describe("BatchActionToolbar — enable/disable and callbacks", () => {
+  const item = (id: string, status: BatchQueueItem["status"]): BatchQueueItem => ({
+    id,
+    tokenId: id,
+    label: id,
+    action: "cancel",
+    status,
+  });
+
+  it("enables Cancel and Repay by default", () => {
+    render(
+      <BatchActionToolbar selectedCount={2} onCancel={vi.fn()} onRepay={vi.fn()} onExport={vi.fn()} />
+    );
+    expect(screen.getByTestId("batch-cancel-btn")).toBeEnabled();
+    expect(screen.getByTestId("batch-repay-btn")).toBeEnabled();
+  });
+
+  it("disables Cancel when canCancel=false and does not fire onCancel", async () => {
+    const onCancel = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <BatchActionToolbar selectedCount={2} onCancel={onCancel} onExport={vi.fn()} canCancel={false} />
+    );
+
+    const cancelBtn = screen.getByTestId("batch-cancel-btn");
+    expect(cancelBtn).toBeDisabled();
+    await user.click(cancelBtn);
+    expect(onCancel).not.toHaveBeenCalled();
+  });
+
+  it("disables Repay when canRepay=false and does not fire onRepay", async () => {
+    const onRepay = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <BatchActionToolbar
+        selectedCount={2}
+        onCancel={vi.fn()}
+        onRepay={onRepay}
+        onExport={vi.fn()}
+        canRepay={false}
+      />
+    );
+
+    const repayBtn = screen.getByTestId("batch-repay-btn");
+    expect(repayBtn).toBeDisabled();
+    await user.click(repayBtn);
+    expect(onRepay).not.toHaveBeenCalled();
+  });
+
+  it("calls onRepay when the Repay button is clicked", async () => {
+    const onRepay = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <BatchActionToolbar selectedCount={2} onCancel={vi.fn()} onRepay={onRepay} onExport={vi.fn()} />
+    );
+
+    await user.click(screen.getByTestId("batch-repay-btn"));
+    expect(onRepay).toHaveBeenCalledTimes(1);
+  });
+
+  it("hides the Repay button when onRepay is not provided", () => {
+    render(<BatchActionToolbar selectedCount={2} onCancel={vi.fn()} onExport={vi.fn()} />);
+    expect(screen.queryByTestId("batch-repay-btn")).not.toBeInTheDocument();
+  });
+
+  it("keeps Export enabled when cancel and repay are disabled", async () => {
+    const onExport = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <BatchActionToolbar
+        selectedCount={2}
+        onCancel={vi.fn()}
+        onRepay={vi.fn()}
+        onExport={onExport}
+        canCancel={false}
+        canRepay={false}
+      />
+    );
+
+    await user.click(screen.getByRole("button", { name: /Export CSV/i }));
+    expect(onExport).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows Retry and calls onResumeFailed when failed items exist", async () => {
+    const onResumeFailed = vi.fn();
+    const user = userEvent.setup();
+    render(
+      <BatchActionToolbar
+        selectedCount={2}
+        onCancel={vi.fn()}
+        onExport={vi.fn()}
+        onResumeFailed={onResumeFailed}
+        items={[item("INV-1", "success"), item("INV-2", "failed")]}
+      />
+    );
+
+    await user.click(screen.getByTestId("batch-resume-btn"));
+    expect(onResumeFailed).toHaveBeenCalledTimes(1);
+  });
+
+  it("hides Retry when no items have failed", () => {
+    render(
+      <BatchActionToolbar
+        selectedCount={2}
+        onCancel={vi.fn()}
+        onExport={vi.fn()}
+        onResumeFailed={vi.fn()}
+        items={[item("INV-1", "success"), item("INV-2", "pending")]}
+      />
+    );
+    expect(screen.queryByTestId("batch-resume-btn")).not.toBeInTheDocument();
+  });
+
+  it("renders per-item progress rows with their status", () => {
+    render(
+      <BatchActionToolbar
+        selectedCount={0}
+        onCancel={vi.fn()}
+        onExport={vi.fn()}
+        items={[item("INV-1", "success"), item("INV-2", "failed")]}
+      />
+    );
+
+    const rows = screen.getByTestId("batch-item-list").querySelectorAll("li");
+    expect(rows).toHaveLength(2);
+    expect(rows[0]).toHaveAttribute("data-status", "success");
+    expect(rows[1]).toHaveAttribute("data-status", "failed");
   });
 });
 

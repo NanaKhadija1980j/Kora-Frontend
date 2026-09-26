@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -42,12 +43,14 @@ export function DataTable<T extends { id: string }>({
   onSelectionChange,
   emptyState,
   getRowId = (row) => row.id,
+  onRowClick,
   className,
   syncToUrl = false,
   pageParamName = "page",
   sortParamName = "sort",
   pageSizeParamName = "pageSize",
 }: DataTableProps<T>) {
+  const t = useTranslations("dataTable");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -164,7 +167,7 @@ export function DataTable<T extends { id: string }>({
     return {
       role: "row",
       tabIndex: 0,
-      "aria-label": `Open details for ${getRowId(row)}`,
+      "aria-label": t("openDetailsAria", { id: getRowId(row) }),
       className: "cursor-pointer",
       onClick: () => onRowClick(row),
       onKeyDown: (e: React.KeyboardEvent) => {
@@ -233,7 +236,7 @@ export function DataTable<T extends { id: string }>({
                   pageData.length > 0 && pageData.every((row) => selected.has(getRowId(row)))
                 }
                 onChange={toggleAll}
-                aria-label="Select all rows on this page"
+                aria-label={t("selectAllAria")}
               />
               Select all on page
             </label>
@@ -333,7 +336,7 @@ export function DataTable<T extends { id: string }>({
                           className="rounded border-input"
                           checked={selected.has(rowId)}
                           onChange={() => toggleRow(rowId)}
-                          aria-label={`Select row ${rowId}`}
+                          aria-label={t("selectRowAria", { id: rowId })}
                         />
                         Select
                       </label>
@@ -416,7 +419,7 @@ export function DataTable<T extends { id: string }>({
                       pageData.length > 0 && pageData.every((row) => selected.has(getRowId(row)))
                     }
                     onChange={toggleAll}
-                    aria-label="Select all rows on this page"
+                    aria-label={t("selectAllAria")}
                   />
                 </th>
               )}
@@ -430,7 +433,7 @@ export function DataTable<T extends { id: string }>({
                       type="button"
                       className="inline-flex items-center gap-1 hover:text-foreground"
                       onClick={() => toggleSort(column.id)}
-                      aria-label={`Sort by ${column.header}`}
+                      aria-label={t("sortByAria", { column: column.header })}
                     >
                       {column.header}
                       <SortIcon columnId={column.id} />
@@ -477,7 +480,7 @@ export function DataTable<T extends { id: string }>({
                             className="rounded border-input"
                             checked={selected.has(rowId)}
                             onChange={() => toggleRow(rowId)}
-                            aria-label={`Select row ${rowId}`}
+                            aria-label={t("selectRowAria", { id: rowId })}
                           />
                         </td>
                       )}

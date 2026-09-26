@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,7 @@ export function Pagination({
   pageParamName = "page",
   pageSizeParamName = "pageSize",
 }: PaginationProps) {
+  const t = useTranslations("pagination");
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -107,7 +109,7 @@ export function Pagination({
   return (
     <nav
       role="navigation"
-      aria-label="Pagination"
+      aria-label={t("navAria")}
       className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between py-4"
     >
       <div className="text-sm text-muted-foreground">
@@ -121,7 +123,7 @@ export function Pagination({
           <div className="flex items-center gap-2">
             <span className="text-sm text-muted-foreground whitespace-nowrap">Show</span>
             <select
-              aria-label="Page size options"
+              aria-label={t("pageSizeAria")}
               className="h-9 rounded-lg border border-input bg-card px-2.5 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               value={pageSize}
               onChange={(e) => handlePageSizeChange(Number(e.target.value))}
@@ -143,7 +145,7 @@ export function Pagination({
             className="h-9 w-9 rounded-lg"
             onClick={() => handlePageChange(normalizedCurrentPage - 1)}
             disabled={normalizedCurrentPage <= 1}
-            aria-label="Previous page"
+            aria-label={t("previousPage")}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
@@ -173,7 +175,7 @@ export function Pagination({
                   isCurrent && "font-semibold pointer-events-none"
                 )}
                 onClick={() => handlePageChange(pageNum)}
-                aria-label={`Go to page ${pageNum}`}
+                aria-label={t("goToPage", { page: pageNum })}
                 aria-current={isCurrent ? "page" : undefined}
               >
                 {pageNum}
@@ -188,7 +190,7 @@ export function Pagination({
             className="h-9 w-9 rounded-lg"
             onClick={() => handlePageChange(normalizedCurrentPage + 1)}
             disabled={normalizedCurrentPage >= totalPages}
-            aria-label="Next page"
+            aria-label={t("nextPage")}
           >
             <ChevronRight className="h-4 w-4" />
           </Button>

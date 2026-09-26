@@ -59,7 +59,10 @@
     "confirmed": "Transação confirmada!",
     "failed": "Transação falhou",
     "retry": "Tentar novamente",
-    "dismiss": "Fechar"
+    "dismiss": "Fechar",
+    "cancelSigningAria": "Cancelar assinatura com segurança",
+    "cancelTxSigningAria": "Cancelar assinatura da transação com segurança",
+    "extraTimeAria": "Adicionar tempo extra para carteira lenta"
   },
   "landing": {
     "headline": "Financiamento de Faturas, On-Chain",
@@ -1318,5 +1321,18 @@
   "yieldProjection": {
     "exportSuccess": "Projeção exportada como PNG",
     "exportError": "Falha ao exportar o gráfico"
+  },
+  "pagination": {
+    "navAria": "Paginação",
+    "pageSizeAria": "Opções de tamanho de página",
+    "previousPage": "Página anterior",
+    "nextPage": "Próxima página",
+    "goToPage": "Ir para a página {page}"
+  },
+  "dataTable": {
+    "selectAllAria": "Selecionar todas as linhas desta página",
+    "selectRowAria": "Selecionar linha {id}",
+    "sortByAria": "Ordenar por {column}",
+    "openDetailsAria": "Abrir detalhes de {id}"
   }
 }

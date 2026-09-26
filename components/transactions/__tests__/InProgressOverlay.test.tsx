@@ -13,6 +13,14 @@ vi.mock("framer-motion", () => ({
   useReducedMotion: () => false,
 }));
 
+// Resolve translations from the English catalog
+vi.mock("next-intl", async () => {
+  const en = (await import("@/messages/en.json")).default as Record<string, Record<string, string>>;
+  return {
+    useTranslations: (namespace: string) => (key: string) => en[namespace]?.[key] ?? key,
+  };
+});
+
 // Mock useTransaction hook and providers
 vi.mock("@/hooks/useTransaction", () => ({
   useTransaction: () => ({
@@ -87,5 +95,28 @@ describe("InProgressOverlay - Accessibility & Live Regions", () => {
 
     const liveRegion = screen.getByTestId("tx-overlay-announcement");
     expect(liveRegion).toHaveTextContent(/signing request timed out/i);
+  });
+
+  it("uses localized aria-labels for extra-time and cancel during signing", () => {
+    useUIStore.setState({
+      txState: {
+        status: "signing",
+        startedAt: Date.now(),
+        timeoutMs: 60000,
+      },
+    });
+
+    render(<InProgressOverlay />);
+
+    expect(screen.getByRole("button", { name: "Add extra time for slow wallet" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Cancel transaction signing safely" })).toBeInTheDocument();
+  });
+
+  it("uses a localized aria-label for cancel on timeout", () => {
+    useUIStore.setState({ txState: { status: "timeout" } });
+
+    render(<InProgressOverlay />);
+
+    expect(screen.getByRole("button", { name: "Cancel signing safely" })).toBeInTheDocument();
   });
 });
