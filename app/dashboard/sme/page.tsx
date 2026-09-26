@@ -27,6 +27,7 @@ import {
   persistBatchQueue,
   clearPersistedBatchQueue,
   type BatchQueueItem,
+  type BatchQueueSnapshot,
   type BatchActionType,
 } from "@/lib/batch/txQueue";
 import { isBatchCancelEligible, isBatchRepayEligible } from "@/lib/batch/eligibility";
@@ -35,6 +36,11 @@ import { sequenceManager } from "@/lib/stellar/client";
 const BatchActionToolbar = dynamic(
   () => import("@/components/dashboard/BatchActionToolbar").then((m) => m.BatchActionToolbar),
   { ssr: false, loading: () => <div className="h-14 w-full animate-pulse rounded-xl bg-zinc-900/40 border border-zinc-800" /> }
+);
+
+const BatchTxQueuePanel = dynamic(
+  () => import("@/components/dashboard/BatchTxQueuePanel").then((m) => m.BatchTxQueuePanel),
+  { ssr: false }
 );
 
 const DataTable = dynamic<DataTableProps<Invoice>>(
@@ -191,6 +197,7 @@ export default function SMEDashboardPage() {
   const [isBatchProcessing, setIsBatchProcessing] = useState(false);
   const [batchProgress, setBatchProgress] = useState(0);
   const [batchItems, setBatchItems] = useState<BatchQueueItem[]>([]);
+  const [batchSnapshot, setBatchSnapshot] = useState<BatchQueueSnapshot | null>(null);
   const [batchAction, setBatchAction] = useState<BatchActionType>("cancel");
   const [batchResults, setBatchResults] = useState<{
     total: number;
@@ -209,6 +216,7 @@ export default function SMEDashboardPage() {
   useEffect(() => {
     const unsubscribe = queueRef.current.subscribe((snap) => {
       setBatchItems(snap.items);
+      setBatchSnapshot(snap);
       setIsBatchProcessing(snap.isRunning);
       setBatchProgress(
         snap.items.length === 0 ? 0 : (snap.processed / snap.items.length) * 100
@@ -701,23 +709,33 @@ export default function SMEDashboardPage() {
       />
 
       {batchActionsEnabled && (
-        <BatchActionToolbar
-          selectedCount={selectedIds.length}
-          onCancel={handleBatchCancel}
-          onRepay={handleBatchRepay}
-          onExport={handleBatchExport}
-          isProcessing={isBatchProcessing}
-          progress={batchProgress}
-          processingLabel={
-            batchAction === "repay"
-              ? `Repaying ${batchItems.length || selectedIds.length} invoices...`
-              : `Cancelling ${batchItems.length || selectedIds.length} invoices...`
-          }
-          items={batchItems}
-          onResumeFailed={handleResumeFailed}
-          canCancel={selectedCancelEligible.length > 0}
-          canRepay={selectedRepayEligible.length > 0}
-        />
+        <>
+          {batchSnapshot && batchSnapshot.items.length > 0 && (
+            <BatchTxQueuePanel
+              snapshot={batchSnapshot}
+              onResumeFailed={handleResumeFailed}
+              onDismiss={() => setBatchSnapshot(null)}
+              className="mb-4"
+            />
+          )}
+          <BatchActionToolbar
+            selectedCount={selectedIds.length}
+            onCancel={handleBatchCancel}
+            onRepay={handleBatchRepay}
+            onExport={handleBatchExport}
+            isProcessing={isBatchProcessing}
+            progress={batchProgress}
+            processingLabel={
+              batchAction === "repay"
+                ? `Repaying ${batchItems.length || selectedIds.length} invoices...`
+                : `Cancelling ${batchItems.length || selectedIds.length} invoices...`
+            }
+            items={batchItems}
+            onResumeFailed={handleResumeFailed}
+            canCancel={selectedCancelEligible.length > 0}
+            canRepay={selectedRepayEligible.length > 0}
+          />
+        </>
       )}
 
       <Dialog open={!!batchResults} onOpenChange={(open) => !open && setBatchResults(null)}>
