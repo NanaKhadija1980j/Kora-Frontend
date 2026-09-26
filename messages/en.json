@@ -59,7 +59,10 @@
     "confirmed": "Transaction confirmed!",
     "failed": "Transaction failed",
     "retry": "Retry",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "cancelSigningSafely": "Cancel signing safely",
+    "addExtraTime": "Add extra time for slow wallet",
+    "cancelTransactionSigningSafely": "Cancel transaction signing safely"
   },
   "landing": {
     "headline": "Invoice Financing, On-Chain",
