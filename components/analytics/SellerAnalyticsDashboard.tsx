@@ -2,6 +2,7 @@
 
 import React, { useMemo, useCallback } from "react";
 import { Download, Tag, Clock, TrendingDown, BarChart2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -80,6 +81,7 @@ export function SellerAnalyticsDashboard({
   positions,
   className,
 }: SellerAnalyticsDashboardProps) {
+  const t = useTranslations("analytics");
   const metrics: SellerListingMetrics[] = useMemo(() => {
     const now = Date.now();
     return listings.map((listing) => {
@@ -162,7 +164,7 @@ export function SellerAnalyticsDashboard({
           size="sm"
           onClick={handleExport}
           className="gap-1.5 text-xs"
-          aria-label="Export seller listing metrics as CSV"
+          aria-label={t("a11y.exportSellerMetrics")}
         >
           <Download className="h-3.5 w-3.5" aria-hidden />
           Export CSV
@@ -200,7 +202,7 @@ export function SellerAnalyticsDashboard({
         <CardContent className="p-0 pb-4">
           <div
             role="table"
-            aria-label="Seller listing metrics table"
+            aria-label={t("a11y.sellerMetricsTable")}
             className="w-full overflow-x-auto"
           >
             {/* Header */}

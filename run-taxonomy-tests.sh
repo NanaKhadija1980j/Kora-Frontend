@@ -1,0 +1,1 @@
+npx playwright test e2e/marketplace.spec.ts -g "Category Taxonomy Preview" --reporter=line

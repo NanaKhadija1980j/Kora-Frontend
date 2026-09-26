@@ -201,8 +201,36 @@
       "openPreview": "معاينة التصنيف",
       "sources": "المصادر",
       "filterSource": "فلاتر السوق",
-      "schemaSource": "مخطط البيانات الوصفية"
-    }
+      "schemaSource": "مخطط البيانات الوصفية",
+      "marketplaceSource": "Marketplace"
+    },
+    "comparison": {
+      "barAriaLabel": "شريط مقارنة الفواتير",
+      "compare": "مقارنة",
+      "loading": "جارٍ التحميل {id}…",
+      "add": "+ إضافة",
+      "shareAriaLabel": "نسخ رابط المقارنة القابل للمشاركة",
+      "share": "مشاركة",
+      "copied": "تم النسخ!",
+      "clearAriaLabel": "مسح جميع المقارنات",
+      "selectAtLeastTwo": "حدد فاتورتين على الأقل للمقارنة",
+      "openTable": "فتح جدول المقارنة"
+    },
+    "watchlist": {
+      "ariaLabel": "قائمة مراقبة الفواتير",
+      "closeAriaLabel": "إغلاق قائمة المراقبة",
+      "title": "قائمة المراقبة",
+      "watchedCount": "{count, plural, zero {# فاتورة مُتابعة} one {فاتورة مُتابعة واحدة} two {فاتورتان مُتابعتان} few {# فواتير مُتابعة} many {# فاتورة مُتابعة} other {# فاتورة مُتابعة}}",
+      "emptyState": "ميّز فاتورة بنجمة لتتبعها هنا.",
+      "raised": "تم جمعها",
+      "unstar": "إلغاء تمييز {invoiceNumber} بنجمة",
+      "alertPreferences": "تفضيلات التنبيهات",
+      "fundingProgress": "تقدم التمويل",
+      "statusChanges": "تغييرات الحالة",
+      "aprChanges": "تغييرات العائد السنوي",
+      "alertsPaused": "التنبيهات متوقفة مؤقتًا."
+    },
+    "searchAria": "البحث في السوق"
   },
   "invoiceDetail": {
     "backToMarketplace": "العودة إلى السوق",
@@ -541,7 +569,53 @@
     "statusFilterAria": "تصفية حسب الحالة",
     "statusLabels": {
       "confirmed": "مؤكدة",
-      "failed": "فاشلة"
+      "failed": "فاشلة",
+      "pending": "معلقة"
+    },
+    "typeLabels": {
+      "mint_invoice": "سك فاتورة",
+      "fund_invoice": "تمويل فاتورة",
+      "repay_invoice": "سداد فاتورة",
+      "claim_yield": "المطالبة بالعائد",
+      "transfer": "تحويل",
+      "other": "معاملة"
+    },
+    "drawer": {
+      "title": "المعاملات",
+      "closeAria": "إغلاق سجل المعاملات",
+      "filters": "عوامل التصفية",
+      "reset": "إعادة ضبط",
+      "filterByTypeAria": "تصفية حسب النوع",
+      "startDatePlaceholder": "تاريخ البدء",
+      "startDateFilterAria": "تصفية تاريخ البدء",
+      "endDatePlaceholder": "تاريخ الانتهاء",
+      "endDateFilterAria": "تصفية تاريخ الانتهاء",
+      "emptyTitle": "لا توجد معاملات بعد",
+      "emptyDesc": "ستظهر المعاملات هنا",
+      "noResultsTitle": "لا توجد نتائج",
+      "noResultsDesc": "حاول ضبط عوامل التصفية",
+      "export": "تصدير",
+      "exportAria": "تصدير المعاملات إلى CSV",
+      "clearAria": "مسح سجل المعاملات",
+      "clearConfirm": "هل تريد مسح كل سجل المعاملات؟ لا يمكن التراجع عن هذا الإجراء.",
+      "detailsTitle": "تفاصيل المعاملة",
+      "closeDetailsAria": "إغلاق تفاصيل المعاملة",
+      "type": "النوع",
+      "txHash": "تجزئة المعاملة",
+      "copyHashAria": "نسخ التجزئة",
+      "status": "الحالة",
+      "amount": "المبلغ",
+      "dateTime": "التاريخ والوقت",
+      "onChainDetails": "التفاصيل على السلسلة",
+      "ledger": "دفتر الأستاذ",
+      "feePaid": "الرسوم المدفوعة",
+      "confirmedAt": "تم التأكيد في",
+      "operations": "العمليات",
+      "memo": "الملاحظة",
+      "detailsUnavailable": "التفاصيل غير متوفرة",
+      "description": "الوصف",
+      "error": "خطأ",
+      "viewExplorer": "عرض في المستكشف"
     }
   },
   "analytics": {
@@ -581,6 +655,23 @@
       "button": "ملخص PDF",
       "title": "ملخص المحفظة",
       "share": "مشاركة الملخص"
+    },
+    "a11y": {
+      "filterJurisdiction": "التصفية حسب الاختصاص القضائي",
+      "filterCategory": "التصفية حسب الفئة",
+      "clearFilters": "مسح جميع الفلاتر",
+      "exportPortfolio": "تصدير بيانات المحفظة",
+      "exportYield": "تصدير بيانات العائد",
+      "exportRisk": "تصدير بيانات المخاطر",
+      "exportReturn": "تصدير بيانات العوائد",
+      "exportVariance": "تصدير تباين العائد كملف CSV",
+      "exportSellerMetrics": "تصدير مقاييس البائع كملف CSV",
+      "sellerMetricsTable": "جدول مقاييس قوائم البائع",
+      "downloadDigest": "تنزيل ملخص المحفظة كملف PDF",
+      "resetFilters": "إعادة تعيين الفلاتر",
+      "exportData": "تصدير بيانات {label}",
+      "fromDate": "من تاريخ",
+      "toDate": "إلى تاريخ"
     }
   },
   "repaymentDialog": {
@@ -690,7 +781,32 @@
     "invoiceCreation": "إنشاء الفواتير وسكّها",
     "liveData": "بيانات السوق المباشرة",
     "reload": "حاول مجددًا",
-    "browseCached": "تصفح الإدراجات المخزنة"
+    "browseCached": "تصفح الإدراجات المخزنة",
+    "pendingQueueTitle": "المعاملات الموقعة المعلقة",
+    "pendingQueueDesc": "تم توقيع هذه المعاملات ولكن تعذر إرسالها. ستتم إعادة المحاولة تلقائيًا عند إعادة الاتصال."
+  },
+  "pendingQueue": {
+    "title": "{count, plural, one {# معاملة معلقة} other {# معاملات معلقة}}",
+    "emptyState": "لا توجد معاملات معلقة — تم إرسال جميع المظاريف الموقعة.",
+    "retryAll": "إعادة محاولة الكل",
+    "retryAriaLabel": "إعادة محاولة هذه المعاملة",
+    "removeAriaLabel": "تجاهل هذه المعاملة",
+    "offlineAriaLabel": "في انتظار الاتصال",
+    "listAriaLabel": "المعاملات الموقعة المعلقة",
+    "waitingOnline": "في الانتظار…",
+    "retrySuccess": "تم إرسال المعاملة بنجاح",
+    "retryFailed": "فشل الإرسال — ستتم إعادة المحاولة عند الاتصال بالإنترنت",
+    "removed": "تمت إزالة المسودة من قائمة الانتظار",
+    "txType": "{type}",
+    "unknownTx": "معاملة موقعة",
+    "invoiceLabel": "فاتورة #{id}",
+    "queuedAt": "في قائمة الانتظار {time}",
+    "attempts": "{count, plural, one {# محاولة} other {# محاولات}}",
+    "statusRetrying": "جارٍ إعادة المحاولة",
+    "statusSuccess": "تم الإرسال",
+    "statusError": "فشل",
+    "statusPending": "في قائمة الانتظار",
+    "badgeAriaLabel": "{count} معاملة (معاملات) معلقة"
   },
   "notFound": {
     "title": "الصفحة غير موجودة",
@@ -724,7 +840,10 @@
     "retry": "إعادة المحاولة",
     "dismiss": "تجاهل",
     "processing": "جارٍ المعالجة…",
-    "noResults": "لا توجد نتائج لـ \"{query}\""
+    "noResults": "لا توجد نتائج لـ \"{query}\"",
+    "selectOption": "اختر خيارًا...",
+    "selectDate": "اختر التاريخ...",
+    "searchOptions": "بحث في الخيارات..."
   },
   "verification": {
     "title": "التحقق من ملكية المحفظة",
@@ -818,7 +937,9 @@
     "hintSettings": "إعدادات الإشعارات",
     "navigate": "تنقل",
     "select": "تحديد",
-    "close": "إغلاق"
+    "close": "إغلاق",
+    "searchPlaceholder": "بحث في الاختصارات",
+    "searchAriaLabel": "بحث في الاختصارات"
   },
   "commandPalette": {
     "ariaLabel": "لوحة الأوامر",
@@ -834,7 +955,23 @@
     "createInvoice": "إنشاء فاتورة",
     "navigate": "تنقل",
     "select": "تحديد",
-    "close": "إغلاق"
+    "close": "إغلاق",
+    "disconnectWallet": "قطع اتصال المحفظة",
+    "shortcuts": "اختصارات",
+    "resultsLabel": "نتائج الأوامر",
+    "pageMarketplace": "السوق",
+    "pageSecondary": "السوق الثانوية",
+    "pageInvest": "لوحة تحكم المستثمر",
+    "pageSme": "فواتيري",
+    "pageTransactions": "سجل المعاملات",
+    "pageAnalytics": "التحليلات",
+    "synonyms": [
+      "ربط المحفظة",
+      "إنشاء فاتورة",
+      "فصل المحفظة",
+      "اختصارات",
+      "اختصارات لوحة المفاتيح"
+    ]
   },
   "feedback": {
     "sendFeedback": "إرسال ملاحظات",
@@ -1177,5 +1314,9 @@
     "openChangelogLabel": "فتح سجل التغييرات",
     "openChangelogUnreadLabel": "فتح سجل التغييرات (إصدار جديد متاح)",
     "copyright": "© {year} Kora Protocol"
+  },
+  "yieldProjection": {
+    "exportSuccess": "تم تصدير التوقعات كملف PNG",
+    "exportError": "فشل تصدير المخطط"
   }
 }

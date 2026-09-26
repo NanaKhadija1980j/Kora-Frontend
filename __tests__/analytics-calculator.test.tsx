@@ -84,7 +84,13 @@ vi.mock("@/components/ui/select", () => {
 
 // Mock next-intl
 vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
+  useTranslations: () => (key: string) => {
+    const messages: Record<string, string> = {
+      exportSuccess: "Projection exported as PNG",
+      exportError: "Failed to export chart",
+    };
+    return messages[key] ?? key;
+  },
   useLocale: () => "en",
   useFormatter: () => ({
     number: (n: number, options?: any) => {

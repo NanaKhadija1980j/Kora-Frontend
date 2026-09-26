@@ -27,6 +27,7 @@ import { useWallet } from "@/hooks/useWallet";
 import { useUIStore } from "@/store/uiStore";
 import { useFormatters } from "@/hooks/useFormatters";
 import { useWalletStore } from "@/store";
+import { useTranslations } from "next-intl";
 
 const SEARCH_DEBOUNCE_MS = 300;
 
@@ -52,23 +53,24 @@ function HighlightMatch({ text, query }: { text: string; query: string }) {
 // ─── Page commands ────────────────────────────────────────────────────────────
 
 const PAGE_COMMANDS = [
-  { id: "page-marketplace", label: "Marketplace", href: "/marketplace", icon: Store },
+  { id: "page-marketplace", labelKey: "pageMarketplace" as const, href: "/marketplace", icon: Store },
   {
     id: "page-secondary",
-    label: "Secondary Market",
+    labelKey: "pageSecondary" as const,
     href: "/secondary",
     icon: ArrowLeftRight,
   },
-  { id: "page-invest", label: "Investor Dashboard", href: "/dashboard/investor", icon: BarChart3 },
-  { id: "page-sme", label: "My Invoices", href: "/dashboard/sme", icon: LayoutDashboard },
-  { id: "page-create", label: "Create Invoice", href: "/invoice/create", icon: PlusCircle },
-  { id: "page-transactions", label: "Transaction History", href: "/transactions", icon: History },
-  { id: "page-analytics", label: "Analytics", href: "/analytics", icon: BarChart3 },
+  { id: "page-invest", labelKey: "pageInvest" as const, href: "/dashboard/investor", icon: BarChart3 },
+  { id: "page-sme", labelKey: "pageSme" as const, href: "/dashboard/sme", icon: LayoutDashboard },
+  { id: "page-create", labelKey: "createInvoice" as const, href: "/invoice/create", icon: PlusCircle },
+  { id: "page-transactions", labelKey: "pageTransactions" as const, href: "/transactions", icon: History },
+  { id: "page-analytics", labelKey: "pageAnalytics" as const, href: "/analytics", icon: BarChart3 },
 ];
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export function CommandPalette() {
+  const t = useTranslations("commandPalette");
   const router = useRouter();
   const { open, setOpen, getRecent, pushRecent } = useCommandPalette();
   const { isConnected } = useWallet();
@@ -76,6 +78,17 @@ export function CommandPalette() {
   const setWalletModalOpen = useUIStore((s) => s.setWalletModalOpen);
   const [query, setQuery] = React.useState("");
   const { formatCurrency, formatPercentage } = useFormatters();
+  const t = useTranslations("commandPalette");
+  const synonyms = t("synonyms") as string[];
+
+  const pageCommands = React.useMemo(
+    () =>
+      PAGE_COMMANDS.map((cmd) => ({
+        ...cmd,
+        label: t(cmd.labelKey),
+      })),
+    [t]
+  );
 
   // Fetch invoices for search (only when palette is open)
   const { data: invoiceData } = useInvoices();
@@ -141,7 +154,7 @@ export function CommandPalette() {
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Command palette"
+          aria-label={t("ariaLabel")}
           data-testid="command-palette-dialog"
           onKeyDown={(e) => {
             if (e.key === "Escape") {
@@ -169,18 +182,18 @@ export function CommandPalette() {
                 autoFocus
                 value={query}
                 onValueChange={setQuery}
-                placeholder="Search pages, invoices, actions…"
+                placeholder={t("searchPlaceholder")}
                 className={cn(
                   "flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground",
                   "outline-none border-none focus:ring-0"
                 )}
-                aria-label="Command palette search"
+                aria-label={t("searchLabel")}
               />
               {query && (
                 <button
                   onClick={() => setQuery("")}
                   className="rounded p-0.5 text-muted-foreground hover:text-foreground"
-                  aria-label="Clear search"
+                  aria-label={t("clearSearch")}
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -193,17 +206,17 @@ export function CommandPalette() {
             {/* Results */}
             <Command.List
               className="max-h-[400px] overflow-y-auto overscroll-contain p-2"
-              aria-label="Command results"
+              aria-label={t("resultsLabel")}
             >
               <Command.Empty className="py-10 text-center text-sm text-muted-foreground">
-                No results for &ldquo;{query}&rdquo;
+                {t("noResults", { query })}
               </Command.Empty>
 
               {/* Recent — shown when query is empty */}
               {showEmpty && recent.length > 0 && (
                 <Command.Group
                   heading={
-                    <GroupHeading icon={<Clock className="h-3 w-3" />} label="Recent" />
+                    <GroupHeading icon={<Clock className="h-3 w-3" />} label={t("recentLabel")} />
                   }
                 >
                   {recent.map((item) => (
@@ -219,13 +232,13 @@ export function CommandPalette() {
               )}
 
               {/* Pages */}
-              {(showEmpty || PAGE_COMMANDS.some((p) => p.label.toLowerCase().includes(query.toLowerCase()))) && (
+              {(showEmpty || pageCommands.some((p) => p.label.toLowerCase().includes(query.toLowerCase()))) && (
                 <Command.Group
                   heading={
-                    <GroupHeading icon={<Store className="h-3 w-3" />} label="Pages" />
+                    <GroupHeading icon={<Store className="h-3 w-3" />} label={t("pagesLabel")} />
                   }
                 >
-                  {PAGE_COMMANDS.filter(
+                  {pageCommands.filter(
                     (p) => showEmpty || p.label.toLowerCase().includes(query.toLowerCase())
                   ).map((page) => (
                     <PaletteItem
@@ -244,7 +257,7 @@ export function CommandPalette() {
               {!showEmpty && filteredInvoices.length > 0 && (
                 <Command.Group
                   heading={
-                    <GroupHeading icon={<FileText className="h-3 w-3" />} label="Invoices" />
+                    <GroupHeading icon={<FileText className="h-3 w-3" />} label={t("invoicesLabel")} />
                   }
                 >
                   {filteredInvoices.map((inv) => (
@@ -265,18 +278,16 @@ export function CommandPalette() {
 
               {/* Actions */}
               {(showEmpty ||
-                ["connect wallet", "create invoice", "disconnect wallet", "shortcuts", "keyboard shortcuts"].some((a) =>
-                  a.includes(query.toLowerCase())
-                )) && (
+                synonyms.some((a) => a.includes(query.toLowerCase()))) && (
                 <Command.Group
                   heading={
-                    <GroupHeading icon={<Zap className="h-3 w-3" />} label="Actions" />
+                    <GroupHeading icon={<Zap className="h-3 w-3" />} label={t("actionsLabel")} />
                   }
                 >
                   {!isConnected && (
                     <PaletteItem
                       icon={<Wallet className="h-4 w-4" />}
-                      label="Connect Wallet"
+                      label={t("connectWallet")}
                       query={query}
                       testId="action-connect-wallet"
                       onSelect={() => runAction(() => setWalletModalOpen(true))}
@@ -284,15 +295,15 @@ export function CommandPalette() {
                   )}
                   <PaletteItem
                     icon={<PlusCircle className="h-4 w-4" />}
-                    label="Create Invoice"
+                    label={t("createInvoice")}
                     query={query}
                     testId="action-create-invoice"
-                    onSelect={() => navigate("/invoice/create", "Create Invoice", "page")}
+                    onSelect={() => navigate("/invoice/create", t("createInvoice"), "page")}
                   />
                   {isConnected && (
                     <PaletteItem
                       icon={<LogOut className="h-4 w-4" />}
-                      label="Disconnect Wallet"
+                      label={t("disconnectWallet")}
                       query={query}
                       testId="action-disconnect-wallet"
                       onSelect={handleDisconnect}
@@ -300,7 +311,7 @@ export function CommandPalette() {
                   )}
                   <PaletteItem
                     icon={<Keyboard className="h-4 w-4" />}
-                    label="Shortcuts"
+                    label={t("shortcuts")}
                     query={query}
                     testId="action-shortcuts"
                     onSelect={() =>
@@ -317,15 +328,15 @@ export function CommandPalette() {
             <div className="flex items-center gap-4 border-t border-border px-4 py-2 text-[11px] text-muted-foreground">
               <span className="flex items-center gap-1">
                 <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">↑↓</kbd>
-                navigate
+                {t("navigate")}
               </span>
               <span className="flex items-center gap-1">
                 <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">↵</kbd>
-                select
+                {t("select")}
               </span>
               <span className="flex items-center gap-1">
                 <kbd className="rounded border border-border bg-muted px-1 py-0.5 font-mono">ESC</kbd>
-                close
+                {t("close")}
               </span>
             </div>
           </Command>

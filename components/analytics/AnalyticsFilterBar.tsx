@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { DateRangePicker, type PresetRange, type DateRange } from "./DateRangePicker";
 
@@ -103,6 +104,7 @@ function hasActiveFilters(filters: AnalyticsFilters): boolean {
  * and a date range picker. Calls onChange on every filter change.
  */
 export function AnalyticsFilterBar({ filters, onChange, className }: AnalyticsFilterBarProps) {
+  const t = useTranslations("analytics");
   const update = (patch: Partial<AnalyticsFilters>) => onChange({ ...filters, ...patch });
 
   return (
@@ -136,7 +138,7 @@ export function AnalyticsFilterBar({ filters, onChange, className }: AnalyticsFi
             value={filters.jurisdiction}
             onChange={(e) => update({ jurisdiction: e.target.value as JurisdictionFilter })}
             className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-200 focus:outline-none focus:ring-1 focus:ring-primary"
-            aria-label="Filter by jurisdiction"
+            aria-label={t("a11y.filterJurisdiction")}
           >
             {JURISDICTIONS.map((j) => (
               <option key={j.value} value={j.value}>
@@ -153,7 +155,7 @@ export function AnalyticsFilterBar({ filters, onChange, className }: AnalyticsFi
             value={filters.category}
             onChange={(e) => update({ category: e.target.value as CategoryFilter })}
             className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-200 focus:outline-none focus:ring-1 focus:ring-primary"
-            aria-label="Filter by category"
+            aria-label={t("a11y.filterCategory")}
           >
             {CATEGORIES.map((c) => (
               <option key={c.value} value={c.value}>
@@ -184,7 +186,7 @@ export function AnalyticsFilterBar({ filters, onChange, className }: AnalyticsFi
             type="button"
             onClick={() => onChange(DEFAULT_FILTERS)}
             className="flex items-center gap-1 text-xs text-zinc-500 hover:text-zinc-200 transition-colors"
-            aria-label="Clear all filters"
+            aria-label={t("a11y.clearFilters")}
           >
             <X className="h-3 w-3" />
             Clear

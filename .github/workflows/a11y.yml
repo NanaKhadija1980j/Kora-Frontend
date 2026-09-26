@@ -43,13 +43,9 @@ jobs:
         run: npx playwright install --with-deps chromium
 
       - name: Build Next.js app
-        # Pre-existing merge-corruption on main can fail the production build.
-        continue-on-error: true
         run: npm run build
 
       - name: Run accessibility audit (axe-playwright)
-        # Soften until axe-playwright API + pre-existing route violations are fully green.
-        continue-on-error: true
         run: npx playwright test e2e/a11y-audit.spec.ts --reporter=html
         env:
           CI: 'true'

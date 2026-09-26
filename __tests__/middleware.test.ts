@@ -71,3 +71,45 @@ describe("middleware locale handling", () => {
     expect(res.cookies.get(LOCALE_COOKIE_NAME)?.value).toBe("en");
   });
 });
+
+describe("middleware /test-components gate", () => {
+  const originalEnv = { ...process.env };
+
+  beforeEach(() => {
+    vi.stubGlobal("crypto", {
+      randomUUID: () => "test-request-id",
+    });
+    process.env = { ...originalEnv };
+  });
+
+  it("redirects /test-components to / in production when dev flag is not enabled", () => {
+    process.env.NODE_ENV = "production";
+    delete process.env.NEXT_PUBLIC_ENABLE_TEST_COMPONENTS;
+
+    const req = createRequest("/test-components");
+    const res = middleware(req);
+
+    expect(res.status).toBe(307);
+    expect(res.headers.get("location")).toBe("http://localhost:3000/");
+  });
+
+  it("allows /test-components in development", () => {
+    process.env.NODE_ENV = "development";
+    delete process.env.NEXT_PUBLIC_ENABLE_TEST_COMPONENTS;
+
+    const req = createRequest("/test-components");
+    const res = middleware(req);
+
+    expect(res.status).toBe(200);
+  });
+
+  it("allows /test-components in production when NEXT_PUBLIC_ENABLE_TEST_COMPONENTS is true", () => {
+    process.env.NODE_ENV = "production";
+    process.env.NEXT_PUBLIC_ENABLE_TEST_COMPONENTS = "true";
+
+    const req = createRequest("/test-components");
+    const res = middleware(req);
+
+    expect(res.status).toBe(200);
+  });
+});

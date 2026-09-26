@@ -133,12 +133,12 @@ export function ComparisonBar() {
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-card/95 backdrop-blur-md shadow-2xl pb-[env(safe-area-inset-bottom)]"
         role="region"
-        aria-label="Invoice comparison bar"
+        aria-label={tMarketplace("comparison.barAriaLabel")}
       >
         <div className="mx-auto flex max-w-7xl flex-col gap-2 px-3 py-2.5 sm:flex-row sm:items-center sm:gap-4 sm:px-6 sm:py-3">
           <div className="flex shrink-0 items-center gap-2">
             <GitCompareArrows className="h-4 w-4 text-primary" />
-            <span className="text-sm font-semibold text-foreground">Compare</span>
+            <span className="text-sm font-semibold text-foreground">{tMarketplace("comparison.compare")}</span>
             <span className="text-xs text-muted-foreground">
               ({comparisonList.length}/{MAX_COMPARISON_INVOICES})
             </span>
@@ -182,7 +182,7 @@ export function ComparisonBar() {
                   key={id}
                   className="flex shrink-0 items-center rounded-lg border border-dashed border-border/60 px-2.5 py-1.5 text-xs text-muted-foreground"
                 >
-                  Loading {id.slice(0, 8)}…
+                  {tMarketplace("comparison.loading", { id: id.slice(0, 8) })}
                 </div>
               ))}
 
@@ -194,7 +194,7 @@ export function ComparisonBar() {
                 key={`empty-${i}`}
                 className="hidden sm:flex shrink-0 items-center justify-center rounded-lg border border-dashed border-border/50 px-4 py-1.5 text-xs text-muted-foreground/50"
               >
-                + Add
+                {tMarketplace("comparison.add")}
               </div>
             ))}
           </div>
@@ -203,21 +203,21 @@ export function ComparisonBar() {
             <button
               onClick={handleShare}
               className="flex items-center gap-1.5 rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-              aria-label="Copy shareable comparison link"
+              aria-label={tMarketplace("comparison.shareAriaLabel")}
             >
               {copied ? (
                 <Check className="h-3.5 w-3.5 text-green-500" />
               ) : (
                 <Share2 className="h-3.5 w-3.5" />
               )}
-              <span className="hidden sm:inline">{copied ? "Copied!" : "Share"}</span>
+              <span className="hidden sm:inline">{copied ? tMarketplace("comparison.copied") : tMarketplace("comparison.share")}</span>
             </button>
 
             {!isMobile && (
               <button
                 onClick={clearComparison}
                 className="rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                aria-label="Clear all comparisons"
+                aria-label={tMarketplace("comparison.clearAriaLabel")}
               >
                 {tMarketplace("clear")}
               </button>
@@ -233,12 +233,12 @@ export function ComparisonBar() {
               )}
               aria-label={
                 selectedInvoices.length < 2
-                  ? "Select at least 2 invoices to compare"
-                  : "Open comparison table"
+                  ? tMarketplace("comparison.selectAtLeastTwo")
+                  : tMarketplace("comparison.openTable")
               }
             >
               <GitCompareArrows className="h-3.5 w-3.5" />
-              Compare
+              {tMarketplace("comparison.compare")}
               {selectedInvoices.length >= 2 && (
                 <span className="ml-0.5 rounded-full bg-primary-foreground/20 px-1.5 py-0.5 text-[10px] font-bold">
                   {selectedInvoices.length}

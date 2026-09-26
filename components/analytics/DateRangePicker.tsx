@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 export type PresetRange = "7d" | "30d" | "90d" | "1y" | "ytd" | "all";
@@ -31,6 +32,7 @@ const PRESETS: { label: string; value: PresetRange }[] = [
  * Shows a validation error when "from" is after "to" in custom mode.
  */
 export function DateRangePicker({ value, customRange, onChange, className }: DateRangePickerProps) {
+  const t = useTranslations("analytics");
   const [showCustom, setShowCustom] = React.useState(value === "custom");
   const [from, setFrom] = React.useState(customRange?.from ?? null);
   const [to, setTo] = React.useState(customRange?.to ?? null);
@@ -90,7 +92,7 @@ export function DateRangePicker({ value, customRange, onChange, className }: Dat
               value={from ? from.toISOString().split("T")[0] : ""}
               onChange={(e) => setFrom(e.target.value ? new Date(e.target.value) : null)}
               className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-200"
-              aria-label="From date"
+              aria-label={t("a11y.fromDate")}
             />
             <span className="text-xs text-zinc-500">–</span>
             <input
@@ -98,7 +100,7 @@ export function DateRangePicker({ value, customRange, onChange, className }: Dat
               value={to ? to.toISOString().split("T")[0] : ""}
               onChange={(e) => setTo(e.target.value ? new Date(e.target.value) : null)}
               className="rounded-md border border-zinc-700 bg-zinc-900 px-2 py-1 text-xs text-zinc-200"
-              aria-label="To date"
+              aria-label={t("a11y.toDate")}
             />
             <button
               type="button"
