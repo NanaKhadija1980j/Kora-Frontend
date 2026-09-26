@@ -59,7 +59,10 @@
     "confirmed": "Transação confirmada!",
     "failed": "Transação falhou",
     "retry": "Tentar novamente",
-    "dismiss": "Fechar"
+    "dismiss": "Fechar",
+    "cancelSigningSafely": "Cancelar assinatura com segurança",
+    "addExtraTime": "Adicionar tempo extra para uma carteira lenta",
+    "cancelTransactionSigningSafely": "Cancelar a assinatura da transação com segurança"
   },
   "landing": {
     "headline": "Financiamento de Faturas, On-Chain",
