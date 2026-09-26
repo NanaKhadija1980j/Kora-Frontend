@@ -3,7 +3,10 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import React from "react";
+import { render as rtlRender, screen, fireEvent } from "@testing-library/react";
+import { NextIntlClientProvider } from "next-intl";
+import en from "@/messages/en.json";
 import { PortfolioDonut } from "@/components/dashboard/PortfolioDonut";
 import { createMockInvoice } from "@/__tests__/fixtures";
 import type { AllocatablePosition } from "@/lib/portfolioAllocation";
@@ -25,6 +28,16 @@ vi.mock("recharts", () => {
     Sector: () => null,
   };
 });
+
+function render(ui: React.ReactElement) {
+  return rtlRender(ui, {
+    wrapper: ({ children }) => (
+      <NextIntlClientProvider locale="en" messages={en}>
+        {children}
+      </NextIntlClientProvider>
+    ),
+  });
+}
 
 const positions: AllocatablePosition[] = [
   {
