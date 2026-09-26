@@ -39,6 +39,7 @@ export function InProgressOverlay() {
   const provider = useWalletStore((s) => s.provider);
   const { escrowState, retryEscrow, resetEscrow } = useSecondaryEscrowFlow();
   const { cancel, extendTimeout } = useTransaction();
+  const t = useTranslations("transaction");
 
   const isSigningStage = txState.status === "signing";
   const isTimeoutStage = txState.status === "timeout";
@@ -425,7 +426,7 @@ export function InProgressOverlay() {
                   <button
                     type="button"
                     onClick={handleCancel}
-                    aria-label={t("cancelSigningAria")}
+                    aria-label={t("cancelSigningSafely")}
                     className={cn(
                       "w-full px-4 py-2 rounded-lg font-medium text-xs transition-all",
                       "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground",
@@ -520,7 +521,7 @@ export function InProgressOverlay() {
                   <button
                     type="button"
                     onClick={() => extendTimeout(60_000)}
-                    aria-label={t("extraTimeAria")}
+                    aria-label={t("addExtraTime")}
                     className={cn(
                       "flex-1 px-3 py-2 rounded-lg font-medium text-xs transition-all",
                       "bg-muted/70 text-muted-foreground hover:bg-muted hover:text-foreground",
@@ -533,7 +534,7 @@ export function InProgressOverlay() {
                   <button
                     type="button"
                     onClick={handleCancel}
-                    aria-label={t("cancelTxSigningAria")}
+                    aria-label={t("cancelTransactionSigningSafely")}
                     className={cn(
                       "flex-1 px-3 py-2 rounded-lg font-medium text-xs transition-all",
                       "bg-muted text-muted-foreground hover:bg-muted/80 hover:text-foreground",
