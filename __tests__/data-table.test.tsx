@@ -166,6 +166,16 @@ describe("DataTable & Pagination localized aria labels", () => {
     expect(screen.getByRole("button", { name: "Sort by Value" })).toBeInTheDocument();
   });
 
+  it("renders the visible select-all label and default empty message from messages", () => {
+    mockUseBreakpoint.mockReturnValue({ isMobile: true, width: 375 });
+    const { rerender } = render(<DataTable data={testData} columns={testColumns} enableSelection syncToUrl={false} />);
+
+    expect(screen.getByText(en.dataTable.selectAllOnPage)).toBeInTheDocument();
+
+    rerender(<DataTable data={[]} columns={testColumns} syncToUrl={false} />);
+    expect(screen.getByText(en.dataTable.noData)).toBeInTheDocument();
+  });
+
   it("renders the row details label from messages", () => {
     render(<DataTable data={testData} columns={testColumns} onRowClick={vi.fn()} />);
 
@@ -180,5 +190,40 @@ describe("DataTable & Pagination localized aria labels", () => {
     expect(screen.getByRole("button", { name: "Previous page" })).toBeDisabled();
     expect(screen.getByRole("button", { name: "Next page" })).toBeEnabled();
     expect(screen.getByRole("button", { name: "Go to page 2" })).toBeInTheDocument();
+  });
+});
+
+describe("Select async options error handling", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUseBreakpoint.mockReturnValue({ isMobile: false, width: 1024 });
+    vi.mocked(useSearchParams).mockReturnValue(new URLSearchParams());
+  });
+
+  it("surfaces an inline error and retry control when async options fail", async () => {
+    const { Select } = await import("../components/ui/select");
+    const loadOptions = vi
+      .fn()
+      .mockRejectedValueOnce(new Error("network down"))
+      .mockResolvedValueOnce([{ value: "a", label: "Alpha" }]);
+
+    render(
+      <Select
+        aria-label="Async select"
+        loadOptions={loadOptions}
+        options={[]}
+      />
+    );
+
+    const combobox = screen.getByRole("combobox", { name: "Async select" });
+    fireEvent.focus(combobox);
+
+    expect(await screen.findByRole("alert")).toHaveTextContent(/could not load options/i);
+
+    const retry = screen.getByRole("button", { name: /retry/i });
+    fireEvent.click(retry);
+
+    expect(loadOptions).toHaveBeenCalledTimes(2);
+    expect(await screen.findByRole("option", { name: "Alpha" })).toBeInTheDocument();
   });
 });

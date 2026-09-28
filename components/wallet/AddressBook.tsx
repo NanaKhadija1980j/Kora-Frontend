@@ -185,9 +185,9 @@ export function AddressBook({ onClose, onSelect }: { onClose?: () => void; onSel
       };
       
       updateAddressBookEntry(entry.id, { signedLabel });
-      toast.success(t("labelSigned") || "Label signed successfully");
+      toast.success(t("labelSigned"));
     } catch (error) {
-      toast.error(t("signFailed") || "Failed to sign label");
+      toast.error(t("signFailed"));
     } finally {
       setSigningId(null);
     }
@@ -196,7 +196,7 @@ export function AddressBook({ onClose, onSelect }: { onClose?: () => void; onSel
   const copyAddress = async (address: string) => {
     try {
       await navigator.clipboard.writeText(address);
-      toast.success(t("addressCopied") || "Address copied");
+      toast.success(t("addressCopied"));
     } catch {
       // Fallback for older browsers
       const textarea = document.createElement("textarea");
@@ -207,7 +207,7 @@ export function AddressBook({ onClose, onSelect }: { onClose?: () => void; onSel
       textarea.select();
       document.execCommand("copy");
       document.body.removeChild(textarea);
-      toast.success(t("addressCopied") || "Address copied");
+      toast.success(t("addressCopied"));
     }
   };
 
@@ -606,7 +606,7 @@ export function AddressBook({ onClose, onSelect }: { onClose?: () => void; onSel
                           {entry.label || truncateAddress(entry.address, 8)}
                         </span>
                         {entry.signedLabel && (
-                          <span className="text-green-500" title={t("verifiedLabel") || "Label verified"}>
+                          <span className="text-green-500" title={t("verifiedLabel")}>
                             <ShieldCheck className="h-4 w-4" />
                           </span>
                         )}

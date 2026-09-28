@@ -6,7 +6,7 @@
 export interface LogContext {
   requestId?: string | null;
   route?: string | null;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ClientErrorReportContext extends LogContext {
@@ -32,7 +32,7 @@ function redactString(value: string): string {
 /**
  * Recursively redacts sensitive fields and serializes Error objects.
  */
-export function redact(obj: any): any {
+export function redact(obj: unknown): unknown {
   if (obj instanceof Error) {
     return {
       name: obj.name,
@@ -49,12 +49,13 @@ export function redact(obj: any): any {
     return obj.map(redact);
   }
 
-  const result: Record<string, any> = {};
-  for (const key of Object.keys(obj)) {
+  const source = obj as Record<string, unknown>;
+  const result: Record<string, unknown> = {};
+  for (const key of Object.keys(source)) {
     if (SENSITIVE_KEY_PATTERN.test(key)) {
       result[key] = "[REDACTED]";
     } else {
-      result[key] = redact(obj[key]);
+      result[key] = redact(source[key]);
     }
   }
   return result;
@@ -74,7 +75,7 @@ class StructuredLogger {
       message,
       requestId: requestId || null,
       route: route || null,
-      ...redact(extra),
+      ...(redact(extra) as Record<string, unknown>),
     };
 
     if (this.isDevelopment()) {

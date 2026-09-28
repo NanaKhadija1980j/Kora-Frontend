@@ -67,7 +67,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       return new NextResponse(null, { status: 204 });
     }
 
-    const redacted = redact(sanitised);
+    const redacted = redact(sanitised) as typeof sanitised;
 
     // Log to server console (visible in Vercel Function logs)
     for (const metric of redacted) {

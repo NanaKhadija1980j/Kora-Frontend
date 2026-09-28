@@ -68,6 +68,41 @@ interface InlineConfirm {
   invoice: Invoice;
 }
 
+// ─── Contract method map ──────────────────────────────────────────────────────
+
+/**
+ * Exhaustive map from a transition's contractMethod to the on-chain call it
+ * dispatches. Typing this against `StatusTransition["contractMethod"]` means a
+ * new contract method added to the state machine fails type-check here until a
+ * handler is provided — no `as any` escape hatch required.
+ */
+type ContractMethod = StatusTransition["contractMethod"];
+
+type ContractCall = (
+  tokenId: string,
+  walletAddress: string,
+  transition: StatusTransition
+) => Promise<unknown>;
+
+const CONTRACT_METHOD_HANDLERS: Record<ContractMethod, ContractCall> = {
+  cancel: async (tokenId, walletAddress) => {
+    const { invoiceContract } = await import("@/lib/stellar/contracts");
+    return invoiceContract.cancelInvoice(BigInt(tokenId), walletAddress);
+  },
+  repay: async (tokenId, walletAddress) => {
+    const { marketplaceContract } = await import("@/lib/stellar/contracts");
+    return marketplaceContract.repayInvoice({ tokenId: BigInt(tokenId) }, walletAddress);
+  },
+  update_status: async (tokenId, walletAddress, transition) => {
+    const chainIndex = STATUS_TO_CHAIN_INDEX[transition.to];
+    if (chainIndex < 0) {
+      throw new Error(`Status "${transition.to}" has no on-chain representation.`);
+    }
+    const { invoiceContract } = await import("@/lib/stellar/contracts");
+    return invoiceContract.updateStatus(BigInt(tokenId), chainIndex, walletAddress);
+  },
+};
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function StatusTransitionButtons({
@@ -116,28 +151,9 @@ export function StatusTransitionButtons({
 
     await execute(
       async () => {
-        switch (transition.contractMethod) {
-          case "cancel": {
-            const { invoiceContract } = await import("@/lib/stellar/contracts");
-            return invoiceContract.cancelInvoice(BigInt(tokenId), walletAddress);
-          }
-          case "repay": {
-            const { marketplaceContract } = await import("@/lib/stellar/contracts");
-            return marketplaceContract.repayInvoice(
-              { tokenId: BigInt(tokenId) },
-              walletAddress
-            );
-          }
-          case "update_status":
-          default: {
-            const chainIndex = STATUS_TO_CHAIN_INDEX[transition.to];
-            if (chainIndex < 0) {
-              throw new Error(`Status "${transition.to}" has no on-chain representation.`);
-            }
-            const { invoiceContract } = await import("@/lib/stellar/contracts");
-            return invoiceContract.updateStatus(BigInt(tokenId), chainIndex, walletAddress);
-          }
-        }
+        // Exhaustive dispatch: every contractMethod has a typed handler.
+        const handler = CONTRACT_METHOD_HANDLERS[transition.contractMethod];
+        return handler(tokenId, walletAddress, transition);
       },
       {
         successMessage: `Invoice ${transition.to.replace(/_/g, " ")} successfully`,
@@ -155,7 +171,7 @@ export function StatusTransitionButtons({
           });
           onSuccess?.(invoice, transition.to);
         },
-      } as any
+      }
     );
   }
 
@@ -212,20 +228,17 @@ export function StatusTransitionButtons({
                       aria-label={tx.label}
                       data-testid={`status-btn-${tx.to}`}
                     >
-                      {isTxPending && inlineConfirm?.transition.to === tx.to
-                        ? t("processing")
-                        : tx.label}
+                      {tx.label}
                     </Button>
                   </span>
                 </TooltipPrimitive.Trigger>
                 {isBlocked && (
                   <TooltipPrimitive.Portal>
                     <TooltipPrimitive.Content
-                      sideOffset={6}
-                      className="z-50 max-w-xs rounded-md bg-popover px-3 py-1.5 text-xs text-popover-foreground shadow-md"
+                      side="top"
+                      className="z-50 rounded-md bg-popover px-2 py-1 text-xs text-popover-foreground shadow-md"
                     >
                       {blockedReason}
-                      <TooltipPrimitive.Arrow className="fill-popover" />
                     </TooltipPrimitive.Content>
                   </TooltipPrimitive.Portal>
                 )}
@@ -235,71 +248,47 @@ export function StatusTransitionButtons({
         </div>
       </TooltipPrimitive.Provider>
 
-      {/* ── Inline confirm dialog (non-destructive) ── */}
+      {/* Non-destructive inline confirm */}
       <Dialog
-        open={!!inlineConfirm}
+        open={inlineConfirm !== null}
         onOpenChange={(open) => {
           if (!open) setInlineConfirm(null);
         }}
       >
-        {inlineConfirm && (
-          <DialogContent className="max-w-sm">
-            <DialogHeader>
-              <DialogTitle>
-                {t("confirmTitle", { label: inlineConfirm.transition.label })}
-              </DialogTitle>
-              <DialogDescription>
-                {inlineConfirm.transition.description}
-              </DialogDescription>
-            </DialogHeader>
-            <p className="text-sm text-muted-foreground">
-              {t("confirmBody", {
-                invoiceNumber: inlineConfirm.invoice.metadata.invoiceNumber,
-                from: inlineConfirm.invoice.status.replace(/_/g, " "),
-                to: inlineConfirm.transition.to.replace(/_/g, " "),
-              })}
-            </p>
-            <p className="text-xs text-muted-foreground">{t("onChainWarning")}</p>
-            <div className="flex gap-2 pt-1">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => setInlineConfirm(null)}
-                disabled={isDisabled}
-              >
-                {t("goBack")}
-              </Button>
-              <Button
-                variant={inlineConfirm.transition.variant}
-                className="flex-1"
-                disabled={isDisabled}
-                data-testid="inline-confirm-btn"
-                onClick={async () => {
-                  await fireTransition(inlineConfirm.transition);
-                  setInlineConfirm(null);
-                }}
-              >
-                {isTxPending ? t("processing") : t("confirm")}
-              </Button>
-            </div>
-          </DialogContent>
-        )}
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{inlineConfirm?.transition.label}</DialogTitle>
+            <DialogDescription>
+              {t("confirmDescription", { status: inlineConfirm?.transition.to ?? "" })}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setInlineConfirm(null)}>
+              {t("cancel")}
+            </Button>
+            <Button
+              disabled={isDisabled}
+              onClick={async () => {
+                const pending = inlineConfirm;
+                if (!pending) return;
+                setInlineConfirm(null);
+                await fireTransition(pending.transition);
+              }}
+            >
+              {t("confirm")}
+            </Button>
+          </div>
+        </DialogContent>
       </Dialog>
 
-      {/* ── Dedicated cancel dialog (destructive) ── */}
+      {/* Destructive cancel dialog */}
       <CancelInvoiceDialog
-        invoice={invoice}
         open={cancelDialogOpen}
-        loading={isTxPending}
-        error={cancelError}
+        onOpenChange={setCancelDialogOpen}
         onConfirm={handleCancelConfirm}
-        onCancel={() => {
-          setCancelDialogOpen(false);
-          setCancelError(undefined);
-        }}
+        error={cancelError}
       />
 
-      {/* Transaction simulation preview */}
       <TxSimulationPreview {...simulationDialogProps} />
     </>
   );

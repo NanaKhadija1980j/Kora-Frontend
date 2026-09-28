@@ -58,7 +58,7 @@ const DatePicker = React.forwardRef<HTMLInputElement, DatePickerProps>(
     ref
   ) => {
     const t = useSafeCommonTranslations();
-    const effectivePlaceholder = placeholder ?? (t?.("selectDate") || "Select date...");
+    const effectivePlaceholder = placeholder ?? t?.("selectDate");
     const generatedId = React.useId();
     const inputId = id || label?.toLowerCase().replace(/\s+/g, "-") || generatedId;
     const errorId = `${inputId}-error`;
