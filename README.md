@@ -519,5 +519,5 @@ MIT © 2025 Kora Protocol Contributors
 
 ## Handsoff notes
 
-<!-- handsoff-issue-882 -->
-- #882: Test gap: PWA InstallPrompt / PendingTxQueuePanel lack unit tests
+<!-- handsoff-issue-871 -->
+- #871: i18n: WalletButton reconnect/EURC trustline toasts English-only

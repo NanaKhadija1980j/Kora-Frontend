@@ -20,6 +20,8 @@
  * • Recharts ResponsiveContainer is mocked to a fixed 800×400 so SVG path
  *   computations are identical across environments.
  * • Date.now() is frozen so any timestamp-derived labels are stable.
+ * • next-intl is mocked with a deterministic `charts.empty.*` catalog so the
+ *   localized empty-state copy is stable across locales/environments.
  */
 
 import { describe, it, expect, beforeAll, vi } from "vitest";
@@ -29,6 +31,28 @@ import type { Meta, StoryObj } from "@storybook/react";
 
 // ─── Fixed clock ──────────────────────────────────────────────────────────────
 vi.useFakeTimers({ now: new Date("2025-06-01T00:00:00Z").getTime() });
+
+// ─── next-intl stub: deterministic localized empty-state copy ─────────────────
+// AnalyticsCharts now resolves empty states via t("charts.empty.*"). Mock the
+// translator so snapshots capture the localized keys rather than depending on
+// a real message catalog being loaded in the test environment.
+const EMPTY_MESSAGES: Record<string, string> = {
+  "charts.empty.default": "No data available",
+  "charts.empty.portfolio": "No portfolio data yet",
+  "charts.empty.revenue": "No revenue data yet",
+  "charts.empty.expenses": "No expense data yet",
+  "charts.empty.invoices": "No invoice data yet",
+};
+
+vi.mock("next-intl", () => ({
+  useTranslations: () => (key: string, values?: Record<string, unknown>) => {
+    const template = EMPTY_MESSAGES[key] ?? key;
+    if (!values) return template;
+    return template.replace(/\{(\w+)\}/g, (_m, name: string) =>
+      name in values ? String(values[name]) : `{${name}}`
+    );
+  },
+}));
 
 // ─── framer-motion stub ───────────────────────────────────────────────────────
 vi.mock("framer-motion", () => ({

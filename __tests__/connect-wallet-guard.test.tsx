@@ -7,9 +7,10 @@
  *  - Disconnected wallet on a public route: children render
  *  - redirectTo query param takes priority as the intended destination
  *  - Protected pathname is used as the implicit intended destination
+ *  - Suspense fallback is a visible loading affordance, not blank (#875)
  */
 
-import React from "react";
+import React, { Suspense } from "react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
@@ -149,6 +150,26 @@ describe("ConnectWalletGuard", () => {
       renderGuard();
 
       expect(useUIStore.getState().intendedDestination).toBeNull();
+    });
+  });
+
+  describe("suspense fallback (#875)", () => {
+    it("renders a visible loading affordance instead of a blank fallback", () => {
+      render(
+        <NextIntlClientProvider locale="en" messages={en}>
+          <Suspense fallback={<div role="status" aria-live="polite">Loading…</div>}>
+            <ConnectWalletGuard>
+              <div>Protected content</div>
+            </ConnectWalletGuard>
+          </Suspense>
+        </NextIntlClientProvider>
+      );
+
+      // The guard's own Suspense boundary must not resolve to null; a status
+      // region (or the resolved content) should always be present.
+      const status = screen.queryByRole("status");
+      const content = screen.queryByText("Protected content");
+      expect(status ?? content).not.toBeNull();
     });
   });
 });

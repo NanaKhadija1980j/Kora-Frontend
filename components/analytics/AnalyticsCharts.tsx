@@ -136,7 +136,7 @@ function ChartFigure({ label, children }: { label: string; children: React.React
   );
 }
 
-function EmptyState({ message = "No data available" }: { message?: string }) {
+function EmptyState({ message }: { message: string }) {
   return (
     <div className="flex h-56 flex-col items-center justify-center gap-2 text-center">
       <TrendingUp className="h-8 w-8 text-muted-foreground" />
@@ -197,7 +197,7 @@ export default function AnalyticsCharts({
             {isLoading ? (
               <ChartSkeleton height={chartHeight} />
             ) : portfolio.length === 0 ? (
-              <EmptyState message="No portfolio data yet" />
+              <EmptyState message={t("charts.empty.portfolio")} />
             ) : (
               <ChartFigure
                 label={describeSeries(
@@ -226,29 +226,23 @@ export default function AnalyticsCharts({
                       tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
                       axisLine={false}
                       tickLine={false}
-                      reversed={rtl}
                     />
                     <YAxis
                       tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
                       axisLine={false}
                       tickLine={false}
-                      orientation={rtl ? "right" : "left"}
-                      tickFormatter={(v: number) =>
-                        `${formatNumber(v / 1000, { maximumFractionDigits: 0 })}K`
-                      }
+                      tickFormatter={(v) => formatCurrency(v, "USDC")}
                     />
                     <Tooltip
                       {...TOOLTIP_STYLE}
                       formatter={(v: number) => [formatCurrency(v, "USDC"), "Value"]}
-                      labelFormatter={(label) => `Month: ${label}`}
                     />
                     <Area
                       type="monotone"
                       dataKey="value"
                       stroke="hsl(var(--primary))"
-                      strokeWidth={2}
                       fill="url(#portfolioGrad)"
-                      isAnimationActive={!isLoading}
+                      strokeWidth={2}
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -257,10 +251,10 @@ export default function AnalyticsCharts({
           </CardContent>
         </Card>
 
-        {/* Monthly Yield */}
+        {/* Yield */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Monthly Yield Earned</CardTitle>
+            <CardTitle className="text-base">Yield Over Time</CardTitle>
             {onExport && (
               <button
                 type="button"
@@ -276,15 +270,19 @@ export default function AnalyticsCharts({
             {isLoading ? (
               <ChartSkeleton height={chartHeight} />
             ) : yieldData.length === 0 ? (
-              <EmptyState message="No yield data yet" />
+              <EmptyState message={t("charts.empty.yield")} />
             ) : (
               <ChartFigure
-                label={describeSeries("Monthly yield earned", yieldData, "month", "yield", (v) =>
-                  formatCurrency(v, "USDC")
+                label={describeSeries(
+                  "Yield over time",
+                  yieldData,
+                  "month",
+                  "yield",
+                  (v) => formatPercentage(v)
                 )}
               >
                 <ResponsiveContainer width="100%" height={chartHeight}>
-                  <BarChart
+                  <LineChart
                     data={yieldData}
                     margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                     accessibilityLayer
@@ -300,22 +298,20 @@ export default function AnalyticsCharts({
                       tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
                       axisLine={false}
                       tickLine={false}
-                      tickFormatter={(v: number) =>
-                        `${formatNumber(v / 1000, { maximumFractionDigits: 0 })}K`
-                      }
+                      tickFormatter={(v) => formatPercentage(v)}
                     />
                     <Tooltip
                       {...TOOLTIP_STYLE}
-                      formatter={(v: number) => [formatCurrency(v, "USDC"), "Yield"]}
-                      labelFormatter={(label) => `Month: ${label}`}
+                      formatter={(v: number) => [formatPercentage(v), "Yield"]}
                     />
-                    <Bar
+                    <Line
+                      type="monotone"
                       dataKey="yield"
-                      fill="hsl(var(--primary))"
-                      radius={[4, 4, 0, 0]}
-                      isAnimationActive={!isLoading}
+                      stroke="hsl(var(--primary))"
+                      strokeWidth={2}
+                      dot={false}
                     />
-                  </BarChart>
+                  </LineChart>
                 </ResponsiveContainer>
               </ChartFigure>
             )}
@@ -323,8 +319,8 @@ export default function AnalyticsCharts({
         </Card>
       </div>
 
-      {/* Risk Distribution & Return Rate Row */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      {/* Risk & Monthly Returns Row */}
+      <div className="mb-6 grid gap-6 lg:grid-cols-2">
         {/* Risk Distribution */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
@@ -342,83 +338,47 @@ export default function AnalyticsCharts({
           </CardHeader>
           <CardContent>
             {isLoading ? (
-              <ChartSkeleton height={compact ? 140 : 180} />
+              <ChartSkeleton height={chartHeight} />
             ) : risk.length === 0 ? (
-              <EmptyState message="No risk data yet" />
+              <EmptyState message={t("charts.empty.risk")} />
             ) : (
-              <>
-                <ChartFigure
-                  label={describeDistribution("Risk distribution across portfolio", risk)}
-                >
-                  <ResponsiveContainer width="100%" height={compact ? 140 : 180}>
-                    <PieChart>
-                      <Pie
-                        data={risk}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={45}
-                        outerRadius={compact ? 60 : 70}
-                        paddingAngle={2}
-                        dataKey="value"
-                        isAnimationActive={!isLoading}
-                        style={{
-                          cursor: onRiskSegmentClick ? "pointer" : "default",
-                        }}
-                        onClick={(_, index) => {
-                          const point = risk[index];
-                          if (point && onRiskSegmentClick) {
-                            onRiskSegmentClick(point.name);
-                          }
-                        }}
-                      >
-                        {risk.map((entry) => (
-                          <Cell key={`cell-${entry.name}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip
-                        {...TOOLTIP_STYLE}
-                        formatter={(v: number) => [`${v}%`, "Allocation"]}
-                      />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </ChartFigure>
-                {/* Keyboard-operable equivalent of the pie segments: the same
-                    drill-down the chart offers via mouse, as real buttons. */}
-                <div className="mt-4 space-y-1.5">
-                  {risk.map((d) => (
-                    <button
-                      key={d.name}
-                      type="button"
-                      className="flex w-full items-center justify-between rounded-md px-1 py-0.5 text-xs transition-colors hover:bg-muted/60 disabled:cursor-default disabled:hover:bg-transparent"
-                      onClick={() => onRiskSegmentClick?.(d.name)}
-                      disabled={!onRiskSegmentClick}
+              <ChartFigure label={describeDistribution("Risk distribution", risk)}>
+                <ResponsiveContainer width="100%" height={chartHeight}>
+                  <PieChart accessibilityLayer>
+                    <Pie
+                      data={risk}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      label={({ name, value }) => `${name}: ${value}%`}
+                      onClick={(entry) => onRiskSegmentClick?.(entry.name)}
+                      style={{ cursor: onRiskSegmentClick ? "pointer" : "default" }}
                     >
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="h-2.5 w-2.5 rounded-full"
-                          style={{ backgroundColor: d.color }}
-                        />
-                        <span className="text-muted-foreground">{d.name}</span>
-                      </div>
-                      <span className="font-medium text-foreground">{d.value}%</span>
-                    </button>
-                  ))}
-                </div>
-              </>
+                      {risk.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip {...TOOLTIP_STYLE} formatter={(v: number) => [`${v}%`, "Allocation"]} />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </ChartFigure>
             )}
           </CardContent>
         </Card>
 
-        {/* Monthly Return Rate */}
-        <Card className="lg:col-span-2">
+        {/* Monthly Returns */}
+        <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">Monthly Return Rate</CardTitle>
+            <CardTitle className="text-base">Monthly Returns</CardTitle>
             {onExport && (
               <button
                 type="button"
                 onClick={() => onExport("monthly")}
                 className="rounded-md p-2 transition-colors hover:bg-muted"
-                aria-label={t("a11y.exportReturn")}
+                aria-label={t("a11y.exportMonthly")}
               >
                 <Download className="h-4 w-4 text-muted-foreground hover:text-foreground" />
               </button>
@@ -428,25 +388,23 @@ export default function AnalyticsCharts({
             {isLoading ? (
               <ChartSkeleton height={chartHeight} />
             ) : monthly.length === 0 ? (
-              <EmptyState message="No return data yet" />
+              <EmptyState message={t("charts.empty.monthly")} />
             ) : (
               <ChartFigure
-                label={describeSeries("Monthly return rate", monthly, "month", "return", (v) =>
-                  formatPercentage(v, 2)
+                label={describeSeries(
+                  "Monthly returns",
+                  monthly,
+                  "month",
+                  "return",
+                  (v) => formatPercentage(v)
                 )}
               >
                 <ResponsiveContainer width="100%" height={chartHeight}>
-                  <LineChart
+                  <BarChart
                     data={monthly}
                     margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
                     accessibilityLayer
                   >
-                    <defs>
-                      <linearGradient id="returnGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
-                        <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis
                       dataKey="month"
@@ -458,155 +416,138 @@ export default function AnalyticsCharts({
                       tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
                       axisLine={false}
                       tickLine={false}
-                      tickFormatter={(v: number) => formatPercentage(v, 1)}
+                      tickFormatter={(v) => formatPercentage(v)}
                     />
                     <Tooltip
                       {...TOOLTIP_STYLE}
-                      formatter={(v: number) => [formatPercentage(v, 2), "Return"]}
-                      labelFormatter={(label) => `Month: ${label}`}
+                      formatter={(v: number) => [formatPercentage(v), "Return"]}
                     />
-                    <Line
-                      type="monotone"
-                      dataKey="return"
-                      stroke="hsl(var(--primary))"
-                      strokeWidth={2}
-                      dot={{ fill: "hsl(var(--primary))", r: 4 }}
-                      activeDot={{ r: 6 }}
-                      isAnimationActive={!isLoading}
-                    />
-                    {/*
-                    Benchmark overlays (#603). Dashed and colour-shifted so they
-                    read as reference lines rather than another data series.
-                  */}
-                    {benchmarks.benchmarks.map((benchmark) => (
-                      <ReferenceLine
-                        key={benchmark.id}
-                        y={benchmark.apr}
-                        stroke={benchmark.color}
-                        strokeDasharray={benchmark.dash}
-                        strokeWidth={1.5}
-                        ifOverflow="extendDomain"
-                        label={{
-                          value: benchmark.defaultLabel,
-                          position: "insideTopRight",
-                          fill: benchmark.color,
-                          fontSize: 10,
-                        }}
-                      />
-                    ))}
-                  </LineChart>
+                    <ReferenceLine y={0} stroke="hsl(var(--border))" />
+                    <Bar dataKey="return" radius={[4, 4, 0, 0]}>
+                      {monthly.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={
+                            entry.return >= 0
+                              ? "hsl(var(--primary))"
+                              : "hsl(var(--destructive))"
+                          }
+                        />
+                      ))}
+                    </Bar>
+                  </BarChart>
                 </ResponsiveContainer>
               </ChartFigure>
-            )}
-            {benchmarks.enabled && (
-              <p className="mt-2 text-[11px] leading-snug text-muted-foreground">
-                {BENCHMARK_DISCLOSURE}
-              </p>
             )}
           </CardContent>
         </Card>
       </div>
 
-      {/* ── Allocation treemap (#600) ───────────────────────────────────── */}
-      {positions && (
-        <div className="mt-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-base">Allocation by Risk &amp; Jurisdiction</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <ChartSkeleton height={chartHeight} />
-              ) : treemap.groups.length === 0 ? (
-                <EmptyState message="No allocation data yet" />
-              ) : (
-                <>
-                  <ChartFigure label={describeTreemap(treemap, (v) => formatCurrency(v, "USDC"))}>
-                    <ResponsiveContainer width="100%" height={compact ? 220 : 300}>
-                      <Treemap
-                        data={treemapSeries}
-                        dataKey="size"
-                        nameKey="name"
-                        stroke="hsl(var(--background))"
-                        isAnimationActive={!isLoading}
-                        content={<TreemapCell />}
-                      >
-                        <Tooltip
-                          {...TOOLTIP_STYLE}
-                          formatter={(value: number) => [formatCurrency(value, "USDC"), "Invested"]}
-                        />
-                      </Treemap>
-                    </ResponsiveContainer>
-                  </ChartFigure>
-                  {concentration && (
-                    <p className="mt-2 text-xs text-muted-foreground">
-                      Largest concentration:{" "}
-                      <span className="font-medium text-foreground">
-                        {concentration.group} / {concentration.leaf}
-                      </span>{" "}
-                      ({formatPercentage(concentration.percentOfTotal, 1)} of portfolio)
-                    </p>
-                  )}
-                </>
+      {/* Allocation Treemap (#600) */}
+      {positions && positions.length > 0 && (
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-base">Allocation Treemap</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <ChartSkeleton height={chartHeight} />
+            ) : treemapSeries.length === 0 ? (
+              <EmptyState message={t("charts.empty.allocation")} />
+            ) : (
+              <ChartFigure label={describeTreemap(treemap)}>
+                <ResponsiveContainer width="100%" height={chartHeight}>
+                  <Treemap
+                    data={treemapSeries}
+                    dataKey="size"
+                    stroke="hsl(var(--background))"
+                    fill="hsl(var(--primary))"
+                    aspectRatio={4 / 3}
+                  >
+                    {treemapSeries.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Treemap>
+                </ResponsiveContainer>
+              </ChartFigure>
+            )}
+            {concentration !== null && (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {t("treemap.concentration", { percent: formatPercentage(concentration) })}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Benchmark Comparison (#603) */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Benchmark Comparison</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <ChartSkeleton height={chartHeight} />
+          ) : portfolio.length === 0 ? (
+            <EmptyState message={t("charts.empty.benchmark")} />
+          ) : (
+            <ChartFigure
+              label={describeSeries(
+                "Benchmark comparison",
+                portfolio,
+                "month",
+                "value",
+                (v) => formatCurrency(v, "USDC")
               )}
-            </CardContent>
-          </Card>
-        </div>
-      )}
+            >
+              <ResponsiveContainer width="100%" height={chartHeight}>
+                <ComposedChart
+                  data={portfolio}
+                  margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
+                  accessibilityLayer
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis
+                    dataKey="month"
+                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                    axisLine={false}
+                    tickLine={false}
+                  />
+                  <YAxis
+                    tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                    axisLine={false}
+                    tickLine={false}
+                    tickFormatter={(v) => formatCurrency(v, "USDC")}
+                  />
+                  <Tooltip
+                    {...TOOLTIP_STYLE}
+                    formatter={(v: number) => [formatCurrency(v, "USDC"), "Value"]}
+                  />
+                  <Legend />
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    name="Portfolio"
+                    stroke="hsl(var(--primary))"
+                    fill="hsl(var(--primary))"
+                    fillOpacity={0.15}
+                    strokeWidth={2}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey={benchmarks.primary.key}
+                    name={benchmarks.primary.label}
+                    stroke={benchmarks.primary.color}
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </ComposedChart>
+              </ResponsiveContainer>
+            </ChartFigure>
+          )}
+          <p className="mt-2 text-xs text-muted-foreground">{BENCHMARK_DISCLOSURE}</p>
+        </CardContent>
+      </Card>
     </motion.div>
-  );
-}
-
-/**
- * Treemap cell renderer.
- *
- * recharts' default cell has no fill control per node and clips its label at
- * any size. This paints the palette colour from the series and only draws the
- * label when the rectangle is actually big enough to hold it — an unreadable
- * sliver of text is worse than none, and the full breakdown is already in the
- * `role="img"` description.
- */
-function TreemapCell(props: Record<string, unknown> = {}) {
-  const x = Number(props.x ?? 0);
-  const y = Number(props.y ?? 0);
-  const width = Number(props.width ?? 0);
-  const height = Number(props.height ?? 0);
-  const name = String(props.name ?? "");
-  const color = typeof props.color === "string" ? props.color : "#94a3b8";
-  const depth = Number(props.depth ?? 0);
-
-  const showLabel = width > 48 && height > 24;
-
-  return (
-    <g>
-      <rect
-        x={x}
-        y={y}
-        width={width}
-        height={height}
-        style={{
-          fill: color,
-          // Parent rectangles sit behind their children; keeping them
-          // transparent avoids washing out the leaf colours.
-          fillOpacity: depth === 1 ? 0 : 0.85,
-          stroke: "hsl(var(--background))",
-          strokeWidth: 2,
-        }}
-      />
-      {showLabel && depth > 1 && (
-        <text
-          x={x + width / 2}
-          y={y + height / 2}
-          textAnchor="middle"
-          dominantBaseline="middle"
-          fill="#0b1220"
-          fontSize={11}
-          fontWeight={600}
-          pointerEvents="none"
-        >
-          {name}
-        </text>
-      )}
-    </g>
   );
 }

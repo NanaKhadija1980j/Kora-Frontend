@@ -41,6 +41,27 @@ function IntendedDestinationSetter() {
 import { Suspense } from "react";
 
 /**
+ * Lightweight, non-blank fallback shown while search-params resolution
+ * suspends. It reserves a stable, full-height region so the surrounding
+ * route chrome does not jump when the real content streams in.
+ */
+function IntendedDestinationFallback() {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex min-h-[60vh] w-full items-center justify-center p-4"
+    >
+      <span className="sr-only">Loading…</span>
+      <div
+        aria-hidden="true"
+        className="h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-foreground"
+      />
+    </div>
+  );
+}
+
+/**
  * Wallet-connection guard for protected routes.
  *
  * This component intentionally enforces only *wallet connection* — not KYB/KYC
@@ -81,7 +102,7 @@ export function ConnectWalletGuard({ children }: { children: React.ReactNode }) 
 
   return (
     <>
-      <Suspense fallback={null}>
+      <Suspense fallback={<IntendedDestinationFallback />}>
         <IntendedDestinationSetter />
       </Suspense>
       {children}

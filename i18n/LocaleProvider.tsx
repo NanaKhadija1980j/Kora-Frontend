@@ -39,12 +39,24 @@ interface LocaleProviderProps {
   children: React.ReactNode;
   /** Pre-loaded messages for all supported locales, keyed by locale code. */
   allMessages: Record<Locale, Record<string, unknown>>;
+  /**
+   * Locale resolved on the server (middleware `x-kora-locale` header) and
+   * passed down from the root layout. Used as the initial state so the first
+   * client render matches the SSR `lang`/`dir` and avoids a post-mount flip.
+   */
+  initialLocale?: Locale;
 }
 
-export function LocaleProvider({ children, allMessages }: LocaleProviderProps) {
-  // Start with the default to avoid hydration mismatch; resolve on mount.
-  const [locale, setLocaleState] = useState<Locale>(defaultLocale);
-  const [mounted, setMounted] = useState(false);
+export function LocaleProvider({
+  children,
+  allMessages,
+  initialLocale,
+}: LocaleProviderProps) {
+  // Seed with the server-resolved locale so the first client render matches
+  // SSR. Fall back to the default when no server locale is provided.
+  const [locale, setLocaleState] = useState<Locale>(
+    initialLocale ?? defaultLocale
+  );
 
   // Update document lang and dir attributes when locale changes
   useEffect(() => {
@@ -55,10 +67,12 @@ export function LocaleProvider({ children, allMessages }: LocaleProviderProps) {
   }, [locale]);
 
   useEffect(() => {
+    // Only reconcile with the client-resolved locale when the server did not
+    // already provide one; otherwise keep the SSR locale to avoid a flip.
+    if (initialLocale) return;
     const resolved = resolveLocale();
     setLocaleState(resolved);
-    setMounted(true);
-  }, []);
+  }, [initialLocale]);
 
   const setLocale = useCallback((next: Locale) => {
     if (!locales.includes(next)) return;
@@ -72,18 +86,6 @@ export function LocaleProvider({ children, allMessages }: LocaleProviderProps) {
     () => ({ locale, setLocale }),
     [locale, setLocale]
   );
-
-  // Suppress hydration mismatch by not rendering locale-dependent content
-  // until after mount (when we know the real locale).
-  if (!mounted) {
-    return (
-      <LocaleContext.Provider value={contextValue}>
-        <NextIntlClientProvider locale={defaultLocale} messages={allMessages[defaultLocale]}>
-          {children}
-        </NextIntlClientProvider>
-      </LocaleContext.Provider>
-    );
-  }
 
   return (
     <LocaleContext.Provider value={contextValue}>

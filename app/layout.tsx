@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import type { NextWebVitalsMetric } from "next/app";
+import { headers } from "next/headers";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "./providers";
@@ -59,6 +60,24 @@ function localeToOgLocale(locale: Locale): string {
     "pt-BR": "pt_BR",
   };
   return localeMap[locale] || "en_US";
+}
+
+/**
+ * Locales that render right-to-left. Kept in sync with i18n/config.
+ */
+const RTL_LOCALES: ReadonlySet<string> = new Set(["ar"]);
+
+/**
+ * Resolve the active locale on the server so the first HTML response carries
+ * the correct `lang`/`dir` attributes. Middleware sets `x-kora-locale` from
+ * the cookie / Accept-Language; fall back to the default locale when absent.
+ */
+function resolveServerLocale(): Locale {
+  const headerLocale = headers().get("x-kora-locale");
+  if (headerLocale && (locales as readonly string[]).includes(headerLocale)) {
+    return headerLocale as Locale;
+  }
+  return defaultLocale;
 }
 
 // ─── Site-wide metadata ───────────────────────────────────────────────────────
@@ -167,8 +186,11 @@ export const viewport: Viewport = {
 const themeInitScript = `(function(){try{var s=JSON.parse(localStorage.getItem('kora-ui-store')||'{}');var t=(s.state&&s.state.theme)||'system';var r=t==='dark'?'dark':t==='light'?'light':window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.classList.add(r);}catch(e){document.documentElement.classList.add('dark');}})();`;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const locale = resolveServerLocale();
+  const dir = RTL_LOCALES.has(locale) ? "rtl" : "ltr";
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} dir={dir} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         {/* Apple PWA meta — Next.js metadata API doesn't cover all apple-* tags */}
@@ -205,7 +227,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         >
           Skip to main content
         </a>
-        <Providers>
+        <Providers initialLocale={locale}>
           <WebVitalsReporter />
           <Navbar />
           <WrongNetworkBanner />
