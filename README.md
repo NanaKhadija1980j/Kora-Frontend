@@ -516,3 +516,8 @@ MIT © 2025 Kora Protocol Contributors
     <a href="https://nextjs.org">Next.js</a>
   </p>
 </div>
+
+## Handsoff notes
+
+<!-- handsoff-issue-871 -->
+- #871: i18n: WalletButton reconnect/EURC trustline toasts English-only
