@@ -10,7 +10,6 @@ build/
 dist/
 
 # env
-.env
 .env*.local
 
 # debug
@@ -38,3 +37,4 @@ public/fallback-*.js
 public/fallback-*.js.map
 
 *.log
+config.bat
