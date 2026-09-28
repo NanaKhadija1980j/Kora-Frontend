@@ -191,33 +191,23 @@ export type InvoiceMetadataV1 = z.infer<typeof invoiceMetadataV1Schema>;
 /** Input type before version field is added (used by builders). */
 export type InvoiceMetadataV1Input = Omit<InvoiceMetadataV1, "metadata_version">;
 
-let purifyInstance: any = null;
-function getPurify() {
-  if (typeof window !== "undefined") {
-    // eslint-disable-next-line
-    return require("dompurify");
-  }
-  if (!purifyInstance) {
-    try {
-      // eslint-disable-next-line no-eval
-      const jsdom = eval("require")("jsdom");
-      // eslint-disable-next-line no-eval
-      const dompurify = eval("require")("dompurify");
-      const { window } = new jsdom.JSDOM("");
-      purifyInstance = dompurify(window);
-    } catch (e) {
-      return {
-        sanitize: (text: string) => text.replace(/<[^>]*>/g, ""),
-      };
-    }
-  }
-  return purifyInstance;
-}
+const NON_TEXT_ELEMENTS = "script, style, template, noscript, iframe, object";
 
+/**
+ * Strips all markup from a plain-text field. Uses the platform's inert
+ * DOMParser when available (browser / jsdom); otherwise falls back to removing
+ * non-text elements with their contents, then any remaining tags.
+ */
 export function sanitizeText(text: string): string {
   if (!text) return "";
-  const purify = getPurify();
-  return purify.sanitize(text, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+  if (typeof DOMParser !== "undefined") {
+    const doc = new DOMParser().parseFromString(text, "text/html");
+    doc.querySelectorAll(NON_TEXT_ELEMENTS).forEach((el) => el.remove());
+    return doc.body.textContent ?? "";
+  }
+  return text
+    .replace(/<(script|style|template|noscript|iframe|object)\b[^>]*>[\s\S]*?<\/\1\s*>/gi, "")
+    .replace(/<[^>]*>/g, "");
 }
 
 export function sanitizeInvoiceMetadata(metadata: InvoiceMetadataV1): InvoiceMetadataV1 {

@@ -17,6 +17,18 @@ import CountdownTimer from "@/components/ui/CountdownTimer";
 import { RepaymentTimeline } from "@/components/invoice/RepaymentTimeline";
 import type { InvoicePosition, InvestorPosition, Invoice } from "@/types";
 
+const HTML_ESCAPES: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
+
+export function escapeHtml(value: unknown): string {
+  return String(value ?? "").replace(/[&<>"']/g, (ch) => HTML_ESCAPES[ch]);
+}
+
 type PositionLike = InvoicePosition | InvestorPosition;
 
 interface PositionDetailDrawerProps {
@@ -71,10 +83,12 @@ export function PositionDetailDrawer({
     // Use window.print() for PDF export
     const printWindow = window.open("", "_blank");
     if (printWindow) {
+      // Sever the opener link (noopener semantics) before writing content.
+      printWindow.opener = null;
       printWindow.document.write(`
         <html>
           <head>
-            <title>Position Details - ${invoice.metadata.invoiceNumber}</title>
+            <title>Position Details - ${escapeHtml(invoice.metadata.invoiceNumber)}</title>
             <style>
               body { font-family: Arial, sans-serif; margin: 20px; }
               h1 { color: #333; margin-bottom: 20px; }
@@ -96,15 +110,15 @@ export function PositionDetailDrawer({
                 </tr>
                 <tr>
                   <td>Invoice Number</td>
-                  <td>${invoice.metadata.invoiceNumber}</td>
+                  <td>${escapeHtml(invoice.metadata.invoiceNumber)}</td>
                 </tr>
                 <tr>
                   <td>Debtor</td>
-                  <td>${invoice.metadata.debtorName}</td>
+                  <td>${escapeHtml(invoice.metadata.debtorName)}</td>
                 </tr>
                 <tr>
                   <td>Invoice Amount</td>
-                  <td>${invoiceAmountStr}</td>
+                  <td>${escapeHtml(invoiceAmountStr)}</td>
                 </tr>
               </table>
             </div>
@@ -117,19 +131,19 @@ export function PositionDetailDrawer({
                 </tr>
                 <tr>
                   <td>Invested Amount</td>
-                  <td>${investedStr}</td>
+                  <td>${escapeHtml(investedStr)}</td>
                 </tr>
                 <tr>
                   <td>Expected Return</td>
-                  <td>${expectedStr}</td>
+                  <td>${escapeHtml(expectedStr)}</td>
                 </tr>
                 <tr>
                   <td>ROI</td>
-                  <td>${roiStr}</td>
+                  <td>${escapeHtml(roiStr)}</td>
                 </tr>
                 <tr>
                   <td>Status</td>
-                  <td>${position.status}</td>
+                  <td>${escapeHtml(position.status)}</td>
                 </tr>
               </table>
             </div>
