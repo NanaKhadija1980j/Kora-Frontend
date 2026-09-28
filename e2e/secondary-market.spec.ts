@@ -8,6 +8,10 @@
  * with a tenor filter, reset back to the full grid, and drive the same filters
  * through the mobile bottom sheet.
  *
+ * Issue #899 adds failure-path coverage: the AcceptTransfer stub failure
+ * banner and the acquire simulation-failure UI must both recover cleanly
+ * without leaving a stuck modal behind.
+ *
  * Run:
  *   npx playwright test e2e/secondary-market.spec.ts
  */
@@ -144,6 +148,65 @@ test.describe("Secondary market browse", () => {
     await expect(page.getByRole("button", { name: "0 - 30 days", exact: true })).toBeVisible({
       timeout: 10_000,
     });
+  });
+});
+
+test.describe("Secondary market failure UX", () => {
+  test("accepting a transfer surfaces the stub failure banner", async ({ page }) => {
+    await gotoSecondary(page);
+    await expect(positionCards(page).first()).toBeVisible({ timeout: 15_000 });
+
+    // Open the accept flow from the first listing.
+    await page.getByRole("button", { name: /accept transfer/i }).first().click();
+
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible({ timeout: 5_000 });
+
+    // Confirm; the stub rejects with NOT_IMPLEMENTED, so the dialog must
+    // surface a failure banner rather than silently closing.
+    await dialog.getByRole("button", { name: /accept|confirm/i }).last().click();
+
+    await expect(
+      page.getByText(/not implemented|failed|unable to accept|something went wrong/i).first(),
+    ).toBeVisible({ timeout: 10_000 });
+  });
+
+  test("an acquire simulation failure dismisses cleanly", async ({ page }) => {
+    await gotoSecondary(page);
+    await expect(positionCards(page).first()).toBeVisible({ timeout: 15_000 });
+
+    await positionCards(page).first().click();
+
+    // The acquire flow may open a modal; if it does, a simulated failure must
+    // not leave it stuck open.
+    const dialog = page.getByRole("dialog");
+    if (await dialog.isVisible().catch(() => false)) {
+      const confirm = dialog.getByRole("button", { name: /acquire|confirm|buy/i }).last();
+      if (await confirm.isVisible().catch(() => false)) {
+        await confirm.click();
+      }
+
+      // Either the modal closes on failure or it shows an inline error — but it
+      // must never remain in a stuck, unresponsive state.
+      await expect
+        .poll(
+          async () => {
+            const stillOpen = await dialog.isVisible().catch(() => false);
+            if (!stillOpen) return "closed";
+            const hasError = await page
+              .getByText(/not implemented|failed|unable to acquire|something went wrong/i)
+              .first()
+              .isVisible()
+              .catch(() => false);
+            return hasError ? "error" : "stuck";
+          },
+          { timeout: 10_000 },
+        )
+        .not.toBe("stuck");
+    }
+
+    // The page itself must remain usable after the failure.
+    await expect(page.getByRole("heading", { name: /secondary market/i })).toBeVisible();
   });
 });
 
