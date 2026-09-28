@@ -48,7 +48,8 @@
     "sessionExpiredDesc": "Desbloqueie sua extensão de carteira ou reconecte para continuar.",
     "reconnect": "Reconectar Carteira",
     "reconnecting": "Reconectando...",
-    "restoringSession": "Restaurando sessão da carteira..."
+    "restoringSession": "Restaurando sessão da carteira...",
+    "balanceLoadFailed": "Falha ao carregar saldos"
   },
   "transaction": {
     "building": "Construindo transação…",
@@ -233,7 +234,9 @@
       "aprChanges": "Mudanças de TAE",
       "alertsPaused": "Os alertas estão pausados."
     },
-    "searchAria": "Buscar no mercado"
+    "searchAria": "Buscar no mercado",
+    "loadMoreFailed": "Falha ao carregar mais faturas.",
+    "retryLoading": "Tentar carregar novamente"
   },
   "invoiceDetail": {
     "backToMarketplace": "Voltar ao Mercado",
@@ -1333,7 +1336,9 @@
     "selectAllAria": "Selecionar todas as linhas desta página",
     "selectRowAria": "Selecionar linha {id}",
     "sortByAria": "Ordenar por {column}",
-    "openDetailsAria": "Abrir detalhes de {id}"
+    "openDetailsAria": "Abrir detalhes de {id}",
+    "selectAllOnPage": "Selecionar tudo na página",
+    "noData": "Nenhum dado para exibir"
   },
   "portfolioDonut": {
     "title": "Composição do portfólio",

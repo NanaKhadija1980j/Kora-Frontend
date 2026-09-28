@@ -979,7 +979,7 @@ function MarketplaceContent() {
                   {infinite.isError && (
                     <div className="mt-4 flex flex-col items-center gap-2 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-center">
                       <p className="text-xs font-medium text-destructive">
-                        {infinite.error instanceof Error ? infinite.error.message : "Failed to load more invoices."}
+                        {t("loadMoreFailed")}
                       </p>
                       <Button
                         variant="outline"
@@ -988,7 +988,7 @@ function MarketplaceContent() {
                         className="gap-2 border-destructive/40 text-xs text-destructive hover:bg-destructive/20"
                       >
                         <RotateCcw className="h-3.5 w-3.5" />
-                        Retry Loading
+                        {t("retryLoading")}
                       </Button>
                     </div>
                   )}

@@ -28,7 +28,6 @@ export function WalletBalanceContent({
   balances,
   isLoading,
   isError,
-  error,
   refresh,
   lowBalanceAsset,
   onClose,
@@ -79,7 +78,7 @@ export function WalletBalanceContent({
         <div className="flex flex-col items-center justify-center p-3 text-center space-y-2" data-testid="wallet-balance-error">
           <AlertCircle className="h-7 w-7 text-destructive" />
           <p className="text-xs text-muted-foreground">
-            {error?.message || "Failed to load balances"}
+            {t("balanceLoadFailed")}
           </p>
           <button
             type="button"
@@ -87,7 +86,7 @@ export function WalletBalanceContent({
             className="flex items-center gap-1.5 text-xs text-primary hover:underline font-medium"
             data-testid="wallet-balance-retry"
           >
-            <RefreshCw className="h-3 w-3" /> Retry
+            <RefreshCw className="h-3 w-3" /> {t("retry")}
           </button>
         </div>
       ) : (

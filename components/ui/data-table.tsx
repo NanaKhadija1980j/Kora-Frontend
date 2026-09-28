@@ -214,7 +214,7 @@ export function DataTable<T extends { id: string }>({
           <p className="mt-4 text-base font-semibold text-foreground">{emptyState.title}</p>
         )}
         <p className="mt-2 text-sm text-muted-foreground">
-          {emptyState?.message ?? "No data to display"}
+          {emptyState?.message ?? t("noData")}
         </p>
         {emptyState?.action && <div className="mt-4">{emptyState.action}</div>}
       </div>
@@ -238,7 +238,7 @@ export function DataTable<T extends { id: string }>({
                 onChange={toggleAll}
                 aria-label={t("selectAllAria")}
               />
-              Select all on page
+              {t("selectAllOnPage")}
             </label>
           )}
 
