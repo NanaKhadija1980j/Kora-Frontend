@@ -13,7 +13,8 @@ import { mapSimulationError } from "@/lib/stellar/simulationErrors";
 import * as StellarSdk from "@stellar/stellar-sdk";
 import { useUIStore } from "@/store/uiStore";
 import { useTransactionStore } from "@/store/transactionStore";
-import { useTransactionHistoryStore } from "@/store/transactionHistoryStore";
+import { useTransactionHistoryStore, type TxType } from "@/store/transactionHistoryStore";
+import type { TxState as UITxState } from "@/types";
 import { enqueueSignedXdr, flushQueuedXdrDrafts, type QueuedXdrDraft } from "@/lib/xdrDraftQueue";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 
@@ -43,6 +44,43 @@ interface TxState {
   status: TxLifecycleStatus;
   txHash?: string;
   error?: string;
+  startedAt?: number;
+  provider?: string;
+  timeoutMs?: number;
+  tips?: string[];
+  canExtend?: boolean;
+}
+
+/** Numeric accessor as exposed by Soroban resource XDR objects. */
+type ResourceGetter = () => number | bigint;
+
+/**
+ * Narrow view of the simulation fields we read resources from. The SDK's
+ * response shape has changed across versions, so every accessor is optional.
+ */
+interface SimulationResourceSource {
+  transactionData?: {
+    resources?: () => {
+      instructions?: ResourceGetter;
+      readBytes?: ResourceGetter;
+      writeBytes?: ResourceGetter;
+    };
+  };
+  sorobanData?: {
+    resources: () => {
+      instructions: ResourceGetter;
+      readBytes: ResourceGetter;
+      writeBytes: ResourceGetter;
+    };
+  };
+}
+
+function getErrorMessage(err: unknown): string | undefined {
+  if (typeof err === "object" && err !== null && "message" in err) {
+    const { message } = err as { message?: unknown };
+    return typeof message === "string" ? message : undefined;
+  }
+  return undefined;
 }
 
 /** Parsed simulation result exposed to the preview dialog. */
@@ -96,7 +134,8 @@ function parseSimulationPreview(
   const feeStroops = parseInt(sim.minResourceFee ?? "0", 10);
   const feeXlm = feeStroops / 10_000_000;
 
-  const resources = (sim as any).transactionData?.resources?.() ?? null;
+  const source = sim as unknown as SimulationResourceSource;
+  const resources = source.transactionData?.resources?.() ?? null;
 
   let cpuInstructions = 0;
   let memoryBytes = 0;
@@ -105,13 +144,13 @@ function parseSimulationPreview(
 
   try {
     if (resources) {
-      cpuInstructions = resources.instructions?.() ?? 0;
-      memoryBytes = resources.readBytes?.() ?? 0; // Soroban SDK naming varies
-      readBytes = resources.readBytes?.() ?? 0;
-      writeBytes = resources.writeBytes?.() ?? 0;
+      cpuInstructions = Number(resources.instructions?.() ?? 0);
+      memoryBytes = Number(resources.readBytes?.() ?? 0); // Soroban SDK naming varies
+      readBytes = Number(resources.readBytes?.() ?? 0);
+      writeBytes = Number(resources.writeBytes?.() ?? 0);
     }
     // Fallback: try sorobanData path
-    const sorobanData = (sim as any).sorobanData;
+    const sorobanData = source.sorobanData;
     if (sorobanData) {
       const r = sorobanData.resources();
       cpuInstructions = Number(r.instructions());
@@ -219,7 +258,7 @@ export function useTransaction() {
 
   const abortControllerRef = useRef<AbortController | null>(null);
   const timeoutResolverRef = useRef<((value: string) => void) | null>(null);
-  const timeoutRejecterRef = useRef<((reason?: any) => void) | null>(null);
+  const timeoutRejecterRef = useRef<((reason?: unknown) => void) | null>(null);
   const signingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const clearSigningTimer = useCallback(() => {
@@ -235,7 +274,7 @@ export function useTransaction() {
       if (status === "retrying") {
         setTxState({ status: "submitting" });
       } else {
-        setTxState({ status, ...extra } as any);
+        setTxState({ status, ...extra } as UITxState);
       }
       // Show loading toast for in-progress stages
       const inProgress: TxLifecycleStatus[] = ["building", "simulating", "signing", "submitting", "polling"];
@@ -317,6 +356,8 @@ export function useTransaction() {
         txDescription?: string;
         txAmount?: string;
         txAssetCode?: string;
+        cancelReason?: string;
+        cancelNotes?: string;
       }
     ): Promise<string | null> => {
       const abortController = new AbortController();
@@ -405,7 +446,7 @@ export function useTransaction() {
           timeoutMs: providerConfig.timeoutMs,
           tips: providerConfig.tips,
           canExtend: true,
-        } as any);
+        });
 
         let signedXdr: string;
         if (unsignedXdr.startsWith("mock_")) {
@@ -487,13 +528,13 @@ export function useTransaction() {
         // Add to history as pending only AFTER submission succeeded
         addTransaction({
           hash,
-          type: (options?.txType as any) || "other",
+          type: (options?.txType as TxType | undefined) || "other",
           status: "pending",
           description: options?.txDescription,
           amount: options?.txAmount,
           assetCode: options?.txAssetCode,
-          cancelReason: (options as any)?.cancelReason,
-          cancelNotes: (options as any)?.cancelNotes,
+          cancelReason: options?.cancelReason,
+          cancelNotes: options?.cancelNotes,
         });
 
         // 5. Poll
@@ -517,9 +558,10 @@ export function useTransaction() {
 
         options?.onSuccess?.(hash);
         return hash;
-      } catch (err: any) {
+      } catch (err: unknown) {
         clearSigningTimer();
-        if (err?.message === "SIGNING_CANCELLED" || err?.message?.includes("cancelled")) {
+        const errMessage = getErrorMessage(err);
+        if (errMessage === "SIGNING_CANCELLED" || errMessage?.includes("cancelled")) {
           setState({ status: "idle" });
           setTxState({ status: "idle" });
           toast.dismiss(TOAST_ID);
