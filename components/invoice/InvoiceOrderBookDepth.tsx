@@ -2,6 +2,7 @@
 
 import React, { useMemo } from "react";
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import { ArrowRight, BookOpen } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +44,7 @@ export function InvoiceOrderBookDepth({
   positionFaceValue,
   className,
 }: InvoiceOrderBookDepthProps) {
+  const t = useTranslations("invoiceDetail.orderBook");
   const { getListingsByInvoiceToken } = usePositionListingStore();
 
   const listings: PositionListingMeta[] = useMemo(
@@ -75,20 +77,20 @@ export function InvoiceOrderBookDepth({
         <div className="flex items-center justify-between gap-2">
           <CardTitle className="flex items-center gap-2 text-sm font-semibold text-white">
             <BookOpen className="h-4 w-4 text-primary" aria-hidden />
-            Order Book Depth
+            {t("title")}
           </CardTitle>
           {depthRows.length > 0 && (
             <Badge
               variant="outline"
               className="border-primary/40 bg-primary/10 text-primary text-[10px]"
-              aria-label={`${depthRows.length} open ask${depthRows.length !== 1 ? "s" : ""}`}
+              aria-label={t("askCount", { count: depthRows.length })}
             >
-              {depthRows.length} Ask{depthRows.length !== 1 ? "s" : ""}
+              {t("askCount", { count: depthRows.length })}
             </Badge>
           )}
         </div>
         <p className="text-xs text-zinc-400">
-          Secondary-market positions available for this invoice, sorted by ask price.
+          {t("description")}
         </p>
       </CardHeader>
 
@@ -96,14 +98,14 @@ export function InvoiceOrderBookDepth({
         {depthRows.length === 0 ? (
           <div className="px-5 pb-2">
             <EmptyState
-              title="No listings yet"
-              description="No positions have been listed for sale on this invoice."
+              title={t("empty.title")}
+              description={t("empty.description")}
             />
           </div>
         ) : (
           <div
             role="table"
-            aria-label="Order book depth for this invoice"
+            aria-label={t("tableLabel")}
             className="w-full"
           >
             {/* Table header */}
@@ -111,11 +113,11 @@ export function InvoiceOrderBookDepth({
               role="row"
               className="grid grid-cols-[1fr_1fr_1fr_auto] gap-x-3 border-b border-zinc-800 px-5 pb-2 text-[10px] font-medium uppercase tracking-wider text-zinc-500"
             >
-              <span role="columnheader">Ask Price</span>
-              <span role="columnheader">Discount</span>
-              <span role="columnheader">Cum. Volume</span>
+              <span role="columnheader">{t("columns.askPrice")}</span>
+              <span role="columnheader">{t("columns.discount")}</span>
+              <span role="columnheader">{t("columns.cumulativeVolume")}</span>
               <span role="columnheader" className="sr-only">
-                Action
+                {t("columns.action")}
               </span>
             </div>
 
@@ -144,7 +146,7 @@ export function InvoiceOrderBookDepth({
                     {formatCurrency(row.askPrice, currency)}
                     {isLowest && (
                       <span className="ml-1.5 text-[9px] text-emerald-400 font-normal">
-                        Best
+                        {t("best")}
                       </span>
                     )}
                   </span>
@@ -170,10 +172,13 @@ export function InvoiceOrderBookDepth({
                       size="sm"
                       variant="ghost"
                       className="h-7 px-2 text-[11px] text-primary hover:text-primary/80"
-                      aria-label={`Acquire position ${row.positionId} at ${formatCurrency(row.askPrice, currency)}`}
+                      aria-label={t("acquireAria", {
+                        positionId: row.positionId,
+                        price: formatCurrency(row.askPrice, currency),
+                      })}
                     >
                       <Link href={`/secondary?highlight=${row.positionId}`}>
-                        Acquire
+                        {t("acquire")}
                         <ArrowRight className="ml-1 h-3 w-3" aria-hidden />
                       </Link>
                     </Button>
@@ -185,12 +190,12 @@ export function InvoiceOrderBookDepth({
             {/* Summary footer */}
             {positionFaceValue !== undefined && depthRows.length > 0 && (
               <div className="mt-2 border-t border-zinc-800 px-5 pt-2 text-[11px] text-zinc-500">
-                Face value per position:{" "}
+                {t("footer.faceValue")}{" "}
                 <span className="font-medium text-zinc-300">
                   {formatCurrency(positionFaceValue, currency)}
                 </span>
                 {" · "}
-                Total ask depth:{" "}
+                {t("footer.totalDepth")}{" "}
                 <span className="font-medium text-zinc-300">
                   {formatCurrency(maxCumulative, currency)}
                 </span>
