@@ -48,7 +48,8 @@
     "sessionExpiredDesc": "افتح ملحق المحفظة أو أعد الاتصال للمتابعة.",
     "reconnect": "إعادة ربط المحفظة",
     "reconnecting": "جارٍ إعادة الربط...",
-    "restoringSession": "جارٍ استعادة جلسة المحفظة..."
+    "restoringSession": "جارٍ استعادة جلسة المحفظة...",
+    "balanceLoadFailed": "تعذر تحميل الأرصدة"
   },
   "transaction": {
     "building": "جارٍ بناء المعاملة…",
@@ -233,7 +234,9 @@
       "aprChanges": "تغييرات العائد السنوي",
       "alertsPaused": "التنبيهات متوقفة مؤقتًا."
     },
-    "searchAria": "البحث في السوق"
+    "searchAria": "البحث في السوق",
+    "loadMoreFailed": "تعذر تحميل المزيد من الفواتير.",
+    "retryLoading": "إعادة محاولة التحميل"
   },
   "invoiceDetail": {
     "backToMarketplace": "العودة إلى السوق",
@@ -1333,7 +1336,9 @@
     "selectAllAria": "تحديد جميع الصفوف في هذه الصفحة",
     "selectRowAria": "تحديد الصف {id}",
     "sortByAria": "الفرز حسب {column}",
-    "openDetailsAria": "فتح تفاصيل {id}"
+    "openDetailsAria": "فتح تفاصيل {id}",
+    "selectAllOnPage": "تحديد الكل في الصفحة",
+    "noData": "لا توجد بيانات لعرضها"
   },
   "portfolioDonut": {
     "title": "تكوين المحفظة",

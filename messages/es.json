@@ -48,7 +48,8 @@
     "sessionExpiredDesc": "Desbloquea tu extensión de billetera o reconéctate para continuar.",
     "reconnect": "Reconectar Billetera",
     "reconnecting": "Reconectando...",
-    "restoringSession": "Restaurando sesión de billetera..."
+    "restoringSession": "Restaurando sesión de billetera...",
+    "balanceLoadFailed": "No se pudieron cargar los saldos"
   },
   "transaction": {
     "building": "Construyendo transacción…",
@@ -233,7 +234,9 @@
       "aprChanges": "Cambios de TAE",
       "alertsPaused": "Las alertas están pausadas."
     },
-    "searchAria": "Buscar en el mercado"
+    "searchAria": "Buscar en el mercado",
+    "loadMoreFailed": "No se pudieron cargar más facturas.",
+    "retryLoading": "Reintentar carga"
   },
   "invoiceDetail": {
     "backToMarketplace": "Volver al Mercado",
@@ -1333,7 +1336,9 @@
     "selectAllAria": "Seleccionar todas las filas de esta página",
     "selectRowAria": "Seleccionar fila {id}",
     "sortByAria": "Ordenar por {column}",
-    "openDetailsAria": "Abrir detalles de {id}"
+    "openDetailsAria": "Abrir detalles de {id}",
+    "selectAllOnPage": "Seleccionar todo en la página",
+    "noData": "No hay datos para mostrar"
   },
   "portfolioDonut": {
     "title": "Composición del portafolio",

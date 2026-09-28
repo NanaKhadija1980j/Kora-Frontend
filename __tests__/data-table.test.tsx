@@ -166,6 +166,16 @@ describe("DataTable & Pagination localized aria labels", () => {
     expect(screen.getByRole("button", { name: "Sort by Value" })).toBeInTheDocument();
   });
 
+  it("renders the visible select-all label and default empty message from messages", () => {
+    mockUseBreakpoint.mockReturnValue({ isMobile: true, width: 375 });
+    const { rerender } = render(<DataTable data={testData} columns={testColumns} enableSelection syncToUrl={false} />);
+
+    expect(screen.getByText(en.dataTable.selectAllOnPage)).toBeInTheDocument();
+
+    rerender(<DataTable data={[]} columns={testColumns} syncToUrl={false} />);
+    expect(screen.getByText(en.dataTable.noData)).toBeInTheDocument();
+  });
+
   it("renders the row details label from messages", () => {
     render(<DataTable data={testData} columns={testColumns} onRowClick={vi.fn()} />);
 

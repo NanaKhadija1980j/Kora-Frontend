@@ -48,7 +48,8 @@
     "sessionExpiredDesc": "Unlock your wallet extension or reconnect to continue.",
     "reconnect": "Reconnect Wallet",
     "reconnecting": "Reconnecting...",
-    "restoringSession": "Restoring wallet session..."
+    "restoringSession": "Restoring wallet session...",
+    "balanceLoadFailed": "Failed to load balances"
   },
   "transaction": {
     "building": "Building transaction…",
@@ -233,7 +234,9 @@
       "filterSource": "Filter by Source",
       "schemaSource": "Schema",
       "marketplaceSource": "Marketplace"
-    }
+    },
+    "loadMoreFailed": "Failed to load more invoices.",
+    "retryLoading": "Retry loading"
   },
   "invoiceDetail": {
     "backToMarketplace": "Back to Marketplace",
@@ -1333,7 +1336,9 @@
     "selectAllAria": "Select all rows on this page",
     "selectRowAria": "Select row {id}",
     "sortByAria": "Sort by {column}",
-    "openDetailsAria": "Open details for {id}"
+    "openDetailsAria": "Open details for {id}",
+    "selectAllOnPage": "Select all on page",
+    "noData": "No data to display"
   },
   "portfolioDonut": {
     "title": "Portfolio Composition",
