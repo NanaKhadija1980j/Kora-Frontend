@@ -39,6 +39,12 @@ const FEEDBACK_MESSAGES: Record<string, string> = {
   submissionFailed: "Submission failed",
   invalidImageType: "Please upload an image file",
   imageTooLarge: "Screenshot must be under 5 MB",
+  "types.bug": "Bug Report",
+  "types.feature": "Feature Request",
+  "types.improvement": "Improvement",
+  "types.other": "Other",
+  "validation.titleMin": "Title must be at least 3 characters",
+  "validation.descriptionMin": "Please provide more detail",
 };
 
 vi.mock("next-intl", () => ({
@@ -110,6 +116,16 @@ describe("FeedbackWidget", () => {
     await user.click(screen.getByLabelText("Open feedback form"));
     return screen.getByRole("dialog", { name: "Feedback form" });
   }
+
+  it("renders localized feedback type labels", async () => {
+    const user = userEvent.setup();
+    const panel = await openPanel(user);
+
+    expect(within(panel).getByText("Bug Report")).toBeInTheDocument();
+    expect(within(panel).getByText("Feature Request")).toBeInTheDocument();
+    expect(within(panel).getByText("Improvement")).toBeInTheDocument();
+    expect(within(panel).getByText("Other")).toBeInTheDocument();
+  });
 
   it("shows zod field errors when title and description are too short", async () => {
     const user = userEvent.setup();
@@ -230,7 +246,10 @@ describe("FeedbackWidget", () => {
     );
     await user.click(within(panel).getByRole("button", { name: "Submit" }));
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    });
+
     const body = JSON.parse(fetchMock.mock.calls[0][1].body as string);
     expect(body.context.walletAddress).toBeNull();
   });

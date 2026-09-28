@@ -7,7 +7,7 @@ import { toLegacyAccountBalance } from "@/lib/walletBalances";
 import { useAccountBalanceQuery } from "@/hooks/useWalletBalances";
 
 /** Auto-refresh interval in milliseconds (60 seconds). */
-const AUTO_REFRESH_INTERVAL = 60_000;
+export const AUTO_REFRESH_INTERVAL = 60_000;
 
 export interface AccountBalance {
   usdc: number;

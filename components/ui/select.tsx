@@ -102,8 +102,8 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     forwardedRef
   ) => {
     const t = useSafeCommonTranslations();
-    const effectivePlaceholder = placeholder ?? (t?.("selectOption") || "Select option...");
-    const searchPlaceholder = t?.("searchOptions") || "Search options...";
+    const effectivePlaceholder = placeholder ?? t?.("selectOption");
+    const searchPlaceholder = t?.("searchOptions");
     const [isOpen, setIsOpen] = React.useState(false);
     const [searchQuery, setSearchQuery] = React.useState("");
     const [asyncOptions, setAsyncOptions] = React.useState<Option[]>([]);

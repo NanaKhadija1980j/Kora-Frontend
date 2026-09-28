@@ -523,7 +523,7 @@ Most interactive pages are client-rendered because they require wallet state. In
 ## Security Considerations
 
 1. **No private keys in the frontend.** All signing is delegated to wallet extensions.
-2. **Environment variables.** Only `NEXT_PUBLIC_*` variables are exposed to the browser. `PINATA_JWT` is server-only and used only in API routes (not yet implemented — currently called client-side for simplicity; move to API route before production).
+2. **Environment variables.** Only `NEXT_PUBLIC_*` variables are exposed to the browser. `PINATA_JWT` is server-only and read exclusively by the `/api/upload` route (`app/api/upload/route.ts`), which verifies a CSRF token (`lib/csrf.ts`) before pinning or unpinning. Client helpers in `lib/ipfs.ts` never see the JWT — they post to `/api/upload`; the only direct browser call to Pinata is the unauthenticated `checkPinataHealth()` reachability probe. See [`SECURITY.md`](../SECURITY.md) and [`.env.example`](../.env.example).
 3. **Input validation.** All form inputs are validated with Zod before any contract call is built.
 4. **IPFS content addressing.** Invoice documents are content-addressed — the CID stored on-chain is a cryptographic hash of the content, making tampering detectable.
 5. **Contract simulation.** Every transaction is simulated before signing. Simulation errors surface to the user before they're asked to sign.
@@ -544,7 +544,7 @@ Most interactive pages are client-rendered because they require wallet state. In
 ## Deployment & CI
 
 - **Build:** The project builds with `next build` and is deployed as a static/SSR hybrid depending on the hosting platform.
-- **CI:** CI should run `pnpm install --frozen-lockfile`, `pnpm lint`, and `pnpm test` (if tests exist) before publishing artifacts.
+- **CI:** CI should run `npm ci`, `npm run lint`, and `npm test` before publishing artifacts.
 - **Secrets:** Use the hosting provider's secret store for server-only variables (e.g., `PINATA_JWT`, private indexer keys). Do not expose them as `NEXT_PUBLIC_*`.
 
 ### Web Vitals regression gate

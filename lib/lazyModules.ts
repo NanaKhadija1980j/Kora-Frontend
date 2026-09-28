@@ -105,12 +105,12 @@ let _pdfExportPromise: Promise<PdfExportModule> | null = null;
 export function loadPdfExport(): Promise<PdfExportModule> {
   if (!_pdfExportPromise) {
     _pdfExportPromise = Promise.all([
-      import("html2canvas" as any),
-      import("jspdf" as any),
+      import("html2canvas"),
+      import("jspdf"),
     ])
       .then(([html2canvasMod, jsPDFMod]) => ({
-        html2canvas: html2canvasMod.default as PdfExportModule["html2canvas"],
-        jsPDF: jsPDFMod.default as PdfExportModule["jsPDF"],
+        html2canvas: html2canvasMod.default,
+        jsPDF: jsPDFMod.default,
       }))
       .catch((err) => {
         _pdfExportPromise = null;

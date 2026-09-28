@@ -261,18 +261,72 @@ export function getAmendBlockedReason(
   return null;
 }
 
+// ─── Contract method map (#898) ──────────────────────────────────────────────
+
 /**
- * Strip any non-amendable fields from a proposed amendment object.
- * Returns only the fields that are safe to apply.
+ * Maps each transition contract method to the contract call it represents.
+ *
+ * This is the single source of truth for the invoice state machine ↔ contract
+ * boundary. `StatusTransitionButtons` routes on-chain calls through this map
+ * instead of casting payloads `as any`, so an unsupported transition fails at
+ * type-check time rather than at runtime.
  */
-export function sanitizeAmendment(
-  proposed: Record<string, unknown>
-): InvoiceAmendment {
-  const safe: InvoiceAmendment = {};
-  for (const field of AMENDABLE_FIELDS) {
-    if (typeof proposed[field] === "string") {
-      safe[field] = proposed[field] as string;
+export interface TransitionContractCall {
+  /** Which contract exposes the method. */
+  contract: "invoice" | "marketplace";
+  /** The contract method name to invoke. */
+  method: "cancelInvoice" | "updateStatus" | "repayInvoice";
+}
+
+export const TRANSITION_CONTRACT_METHODS: Record<
+  TransitionContractMethod,
+  TransitionContractCall
+> = {
+  cancel: { contract: "invoice", method: "cancelInvoice" },
+  update_status: { contract: "invoice", method: "updateStatus" },
+  repay: { contract: "marketplace", method: "repayInvoice" },
+};
+
+/**
+ * Resolves the contract call for a transition, or `null` when the transition
+ * is not part of the state machine.
+ */
+export function getTransitionContractCall(
+  transition: StatusTransition
+): TransitionContractCall {
+  return TRANSITION_CONTRACT_METHODS[transition.contractMethod];
+}
+
+/**
+ * Exhaustive switch over invoice statuses.
+ *
+ * The `never` default arm guarantees that adding a new `InvoiceStatus` without
+ * handling it here is a compile-time error, keeping the state machine in sync
+ * with the status union.
+ */
+export function describeStatus(status: InvoiceStatus): string {
+  switch (status) {
+    case "draft":
+      return "Draft";
+    case "pending_mint":
+      return "Pending mint";
+    case "listed":
+      return "Listed";
+    case "partially_funded":
+      return "Partially funded";
+    case "fully_funded":
+      return "Fully funded";
+    case "active":
+      return "Active";
+    case "repaid":
+      return "Repaid";
+    case "defaulted":
+      return "Defaulted";
+    case "cancelled":
+      return "Cancelled";
+    default: {
+      const exhaustive: never = status;
+      return exhaustive;
     }
   }
-  return safe;
 }

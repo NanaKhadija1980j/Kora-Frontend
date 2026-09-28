@@ -210,430 +210,146 @@ export default function InvestorDashboardPage() {
     listPosition({
       positionId: listingTarget.id,
       askPrice,
-      impliedDiscount: computeImpliedDiscount(askPrice, listingTarget.expectedReturn),
-      listedAt: new Date().toISOString(),
-      invoiceTokenId: listingTarget.invoice?.tokenId,
-      repaymentDate: listingTarget.invoice?.terms.repaymentDate,
-      ownershipConfirmed: true,
+      seller: address ?? "",
     });
     setListingTarget(null);
   };
 
-  const listedPositions = positionsData.filter((pos) => listings[pos.id]);
+  const stats = useMemo(
+    () => [
+      {
+        label: t("stats.portfolioValue"),
+        value: formatCurrency(
+          positionsData.reduce((sum, p) => sum + p.investedAmount, 0),
+        ),
+        icon: DollarSign,
+      },
+      {
+        label: t("stats.expectedReturn"),
+        value: formatCurrency(
+          positionsData.reduce((sum, p) => sum + p.expectedReturn, 0),
+        ),
+        icon: TrendingUp,
+      },
+      {
+        label: t("stats.yieldEarned"),
+        value: formatCurrency(
+          positionsData.reduce(
+            (sum, p) => sum + Math.max(0, p.expectedReturn - p.investedAmount),
+            0,
+          ),
+        ),
+        icon: BarChart3,
+      },
+      {
+        label: t("stats.activePositions"),
+        value: String(positionsData.length),
+        icon: Store,
+      },
+    ],
+    [positionsData, formatCurrency, t],
+  );
 
   if (!isConnected) {
     return (
-      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-4 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-muted">
-          <BarChart3 className="h-6 w-6 text-muted-foreground" />
-        </div>
-        <h2 className="text-xl font-semibold text-foreground">
-          {t("connectTitle")}
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          {t("connectDesc")}
-        </p>
-        <Button onClick={() => setWalletModalOpen(true)}>{tCommon("connectWallet")}</Button>
-      </div>
-    );
-  }
-
-  if (loadTimedOut || positionsQuery.isError) {
-    return (
-      <div
-        className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-4 text-center"
-        role="alert"
-        aria-live="assertive"
-      >
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-destructive/10">
-          <AlertTriangle className="h-6 w-6 text-destructive" />
-        </div>
-        <h2 className="text-xl font-semibold text-foreground">
-          Unable to load portfolio
-        </h2>
-        <p className="max-w-md text-sm text-muted-foreground">
-          {loadTimedOut
-            ? "Loading took longer than 30 seconds. Check your connection and try again."
-            : "Something went wrong while fetching your positions."}
-        </p>
-        <Button
-          onClick={() => {
-            setLoadTimedOut(false);
-            void positionsQuery.refetch();
-          }}
-        >
-          Retry
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
+        <Store className="h-12 w-12 text-zinc-600" />
+        <h1 className="text-2xl font-semibold text-white">
+          {t("connectWallet.title")}
+        </h1>
+        <p className="max-w-md text-zinc-400">{t("connectWallet.description")}</p>
+        <Button onClick={() => setWalletModalOpen(true)}>
+          {tCommon("connectWallet")}
         </Button>
       </div>
     );
   }
 
-  if (isInitialLoading) {
+  if (isInitialLoading && !loadTimedOut) {
     return <InvestorDashboardSkeleton />;
   }
 
-  const totalInvested = positionsData.reduce(
-    (sum, position) => sum + position.investedAmount,
-    0,
-  );
-  const totalExpected = positionsData.reduce(
-    (sum, position) => sum + position.expectedReturn,
-    0,
-  );
-  const totalYield = totalExpected - totalInvested;
-  const averageApr = positionsData.length
-    ? positionsData.reduce(
-        (sum, position) => sum + (position.invoice?.terms.apr ?? 0),
-        0,
-      ) / positionsData.length
-    : 0;
-
-
-  const STATS = [
-    {
-      label: "Portfolio Value",
-      value: formatCurrency(totalInvested, "USDC", true),
-      change: `${positionsData.length} ${positionsData.length === 1 ? "position" : "positions"}`,
-      changePositive: true,
-      icon: <DollarSign className="h-4 w-4" />,
-    },
-    {
-      label: "Expected Yield",
-      value: formatCurrency(totalYield, "USDC", true),
-      change:
-        totalInvested > 0
-          ? `${((totalYield / totalInvested) * 100).toFixed(1)}% return`
-          : "0.0% return",
-      changePositive: true,
-      icon: <TrendingUp className="h-4 w-4" />,
-    },
-    {
-      label: "Active Positions",
-      value: positionsData.length.toString(),
-      icon: <BarChart3 className="h-4 w-4" />,
-    },
-    {
-      label: "Avg. APR",
-      value: `${averageApr.toFixed(1)}%`,
-      change: "Across all positions",
-      changePositive: true,
-      icon: <Clock className="h-4 w-4" />,
-    },
-  ];
-
-  const POSITION_COLUMNS: ColumnDef<InvestorPosition>[] = [
-    {
-      id: "invoice",
-      header: "Invoice",
-      accessor: (row) => row.invoice?.metadata.invoiceNumber ?? row.invoiceId,
-      cell: (row) => (
-        <div>
-          <p className="font-medium text-foreground">
-            {row.invoice?.metadata.invoiceNumber ?? `Invoice ${row.invoiceId}`}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {row.invoice?.metadata.category ?? "Unspecified"}
-          </p>
-        </div>
-      ),
-    },
-    {
-      id: "debtor",
-      header: "Debtor",
-      accessor: (row) => row.invoice?.metadata.debtorName ?? "Unknown debtor",
-      cell: (row) => (
-        <span className="text-muted-foreground">
-          {row.invoice?.metadata.debtorName ?? "Unknown debtor"}
-        </span>
-      ),
-    },
-    {
-      id: "invested",
-      header: "Invested",
-      accessor: (row) => row.investedAmount,
-      cell: (row) => (
-        <span className="font-medium text-foreground">
-          {formatCurrency(row.investedAmount, "USDC", true)}
-        </span>
-      ),
-    },
-    {
-      id: "expected",
-      header: "Expected Return",
-      accessor: (row) => row.expectedReturn,
-      cell: (row) => (
-        <span className="font-medium text-success">
-          {formatCurrency(row.expectedReturn, "USDC", true)}
-        </span>
-      ),
-    },
-    {
-      id: "yield",
-      header: "Yield",
-      accessor: (row) => row.expectedReturn - row.investedAmount,
-      cell: (row) => (
-        <span className="text-primary">
-          +
-          {formatCurrency(
-            row.expectedReturn - row.investedAmount,
-            "USDC",
-            true,
-          )}
-        </span>
-      ),
-    },
-    {
-      id: "apr",
-      header: "APR",
-      accessor: (row) => row.invoice?.terms.apr ?? 0,
-      cell: (row) => (
-        <span className="font-medium text-primary">
-          {formatApr(row.invoice?.terms.apr ?? 0)}
-        </span>
-      ),
-    },
-    {
-      id: "risk",
-      header: "Risk",
-      accessor: (row) => row.invoice?.riskTier ?? "AAA",
-      cell: (row) => (
-        <span
-          className={cn(
-            "rounded-md border px-2 py-0.5 text-xs font-semibold",
-            RISK_TIER_COLORS[row.invoice?.riskTier ?? "AAA"],
-          )}
-        >
-          {row.invoice?.riskTier ?? "AAA"}
-        </span>
-      ),
-    },
-    {
-      id: "due",
-      header: "Due Date",
-      accessor: (row) => row.invoice?.terms.repaymentDate ?? "",
-      cell: (row) => (
-        <span className="text-xs text-muted-foreground">
-          {formatDate(row.invoice?.terms.repaymentDate ?? "")}
-        </span>
-      ),
-    },
-    {
-      id: "listing",
-      header: "Listing",
-      sortable: false,
-      cell: (row) =>
-        listings[row.id] ? (
-          <Badge variant="kora">
-            <Tag className="mr-1 h-3 w-3" aria-hidden />
-            Listed · {formatCurrency(listings[row.id].askPrice, "USDC", true)}
-          </Badge>
-        ) : (
-          <span className="text-xs text-muted-foreground">—</span>
-        ),
-    },
-    {
-      id: "actions",
-      header: "",
-      sortable: false,
-      cell: (row) => (
-        <div className="flex items-center gap-2">
-          {row.status === "repaid" ? (
-            <Button size="sm" onClick={() => handleClaim(row)}>
-              Claim
-            </Button>
-          ) : null}
-          {row.status === "active" &&
-            (listings[row.id] ? (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => unlistPosition(row.id)}
-              >
-                Unlist
-              </Button>
-            ) : (
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setListingTarget(row)}
-              >
-                <Tag className="h-3.5 w-3.5" /> List for Sale
-              </Button>
-            ))}
-          <Link
-            href={`/marketplace/${row.invoice?.id ?? row.invoiceId}`}
-            className="text-xs text-primary hover:opacity-80"
-          >
-            View →
-          </Link>
-        </div>
-      ),
-    },
-  ];
+  if (positionsQuery.isError || loadTimedOut) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
+        <AlertTriangle className="h-12 w-12 text-amber-500" />
+        <h1 className="text-2xl font-semibold text-white">
+          {t("error.title")}
+        </h1>
+        <p className="max-w-md text-zinc-400">
+          {loadTimedOut ? t("error.timeout") : t("error.description")}
+        </p>
+        <Button onClick={() => positionsQuery.refetch()}>{t("error.retry")}</Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6" aria-busy="false">
-      <div className="mb-8 flex items-center justify-between">
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">
-            {t("title")}
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            {t("subtitle")}
-          </p>
-          <StaleDataBadge
-            updatedAt={positionsQuery.dataUpdatedAt || null}
-            className="mt-2"
-          />
+          <h1 className="text-2xl font-semibold text-white">{t("title")}</h1>
+          <p className="text-sm text-zinc-400">{t("subtitle")}</p>
         </div>
-        <Link href="/marketplace">
-          <Button variant="outline">
-            <Store className="h-4 w-4" /> Browse Marketplace
-          </Button>
-        </Link>
+        <StaleDataBadge
+          updatedAt={positionsQuery.dataUpdatedAt}
+          isFetching={positionsQuery.isFetching}
+        />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {stats.map((stat) => (
+          <StatCard
+            key={stat.label}
+            label={stat.label}
+            value={stat.value}
+            icon={stat.icon}
+          />
+        ))}
       </div>
 
       <KycStatusCard />
 
-      <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {STATS.map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.07 }}
-          >
-            <StatCard {...stat} />
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Issue #604: the donut shows how the portfolio splits; this says when a
-          split has become a risk. Sits directly above it so the warning and the
-          chart it refers to are read together. */}
-      <ConcentrationRiskAlerts className="mb-6" positions={donutPositions} />
-
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.28 }}
-        className="mb-8"
-      >
-        <PortfolioDonut
-          positions={donutPositions}
-          activeFilter={donutFilter}
-          onSegmentClick={handleSegmentClick}
-        />
-      </motion.div>
+      <ConcentrationRiskAlerts positions={positionsData} />
 
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-4">
-          <CardTitle>
-            {donutFilter
-              ? `Positions — ${donutFilter.value}`
-              : "Active Positions"}
-          </CardTitle>
-          {donutFilter && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-xs text-muted-foreground"
-              onClick={() => setDonutFilter(null)}
-            >
-              Clear filter ×
-            </Button>
-          )}
+        <CardHeader>
+          <CardTitle>{t("allocation.title")}</CardTitle>
         </CardHeader>
-        <CardContent className="p-4 sm:p-6">
-          <DataTable
-            data={filteredPositions}
-            columns={POSITION_COLUMNS as any}
-            isLoading={false}
-            pageSize={5}
-            emptyState={{
-              title: donutFilter ? "No matching positions" : t("empty.title"),
-              message: donutFilter
-                ? `No positions match the selected filter (${donutFilter.value}).`
-                : t("empty.message"),
-              illustration: (
-                <BarChart3 className="h-10 w-10 text-muted-foreground" />
-              ),
-            }}
+        <CardContent>
+          <PortfolioDonut
+            positions={donutPositions}
+            onSegmentClick={handleSegmentClick}
           />
         </CardContent>
       </Card>
-      
 
-      {listedPositions.length > 0 && (
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Tag className="h-4 w-4 text-primary" aria-hidden />
-              Active Listings
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6">
-            <div className="space-y-3">
-              {listedPositions.map((pos) => {
-                const listing = listings[pos.id];
-                if (!listing) return null;
-                const currency = pos.invoice?.metadata.currency ?? "USDC";
-                return (
-                  <div
-                    key={pos.id}
-                    className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-muted/30 p-3"
-                  >
-                    <div>
-                      <p className="font-medium text-foreground">
-                        {pos.invoice?.metadata.invoiceNumber ?? `Invoice ${pos.invoiceId}`}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        Listed {formatDate(listing.listedAt)}
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-foreground">
-                        {formatCurrency(listing.askPrice, currency)}
-                      </p>
-                      <p
-                        className={cn(
-                          "text-xs",
-                          listing.impliedDiscount >= 0 ? "text-success" : "text-warning",
-                        )}
-                      >
-                        {(listing.impliedDiscount * 100).toFixed(2)}% implied discount
-                      </p>
-                    </div>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => unlistPosition(pos.id)}
-                    >
-                      Unlist
-                    </Button>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      <SellerAnalyticsDashboard />
+
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between gap-3">
+          <CardTitle>{t("positions.title")}</CardTitle>
+          <Badge variant="secondary">
+            {t("positions.count", { count: filteredPositions.length })}
+          </Badge>
+        </CardHeader>
+        <CardContent>
+          <DataTable
+            data={filteredPositions}
+            columns={columns}
+            emptyMessage={t("positions.empty")}
+          />
+        </CardContent>
+      </Card>
 
       <ListPositionDialog
+        open={Boolean(listingTarget)}
+        onOpenChange={(open) => {
+          if (!open) setListingTarget(null);
+        }}
         position={listingTarget}
-        open={listingTarget !== null}
-        onOpenChange={(open) => !open && setListingTarget(null)}
         onSubmit={handleListSubmit}
       />
-
-      {/* Seller analytics (#593) — shown whenever the investor has active listings */}
-      {listedPositions.length > 0 && (
-        <SellerAnalyticsDashboard
-          listings={Object.values(listings)}
-          positions={positionsData}
-          className="mt-8"
-        />
-      )}
 
       <TxSimulationPreview {...simulationDialogProps} />
     </div>

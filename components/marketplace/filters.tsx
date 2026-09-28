@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 export const JURISDICTIONS = [
   { code: "US", name: "United States", flag: "🇺🇸" },
@@ -47,3 +48,39 @@ export const YIELD_OPTIONS = [
   { value: "10", label: "10%+ Yield" },
   { value: "15", label: "15%+ Yield" },
 ];
+
+/**
+ * Resolve a localized display label for a jurisdiction code while keeping the
+ * stable code as the value used in URLs and filtering logic.
+ */
+export function useJurisdictionLabel() {
+  const { t } = useTranslation();
+  return (code: string) => t(`jurisdictions.${code}`, { defaultValue: code });
+}
+
+/**
+ * Resolve a localized display label for a category key while keeping the
+ * stable key as the value used in URLs and filtering logic.
+ */
+export function useCategoryLabel() {
+  const { t } = useTranslation();
+  return (key: string) => t(`categories.${key}`, { defaultValue: key });
+}
+
+/**
+ * Resolve a localized display label for a tenor option value while keeping the
+ * stable value as the value used in URLs and filtering logic.
+ */
+export function useTenorLabel() {
+  const { t } = useTranslation();
+  return (value: string) => t(`tenors.${value}`, { defaultValue: value });
+}
+
+/**
+ * Resolve a localized display label for a yield option value while keeping the
+ * stable value as the value used in URLs and filtering logic.
+ */
+export function useYieldLabel() {
+  const { t } = useTranslation();
+  return (value: string) => t(`yields.${value}`, { defaultValue: value });
+}
