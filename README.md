@@ -519,5 +519,5 @@ MIT © 2025 Kora Protocol Contributors
 
 ## Handsoff notes
 
-<!-- handsoff-issue-896 -->
-- #896: i18n: transfer flow success toast hardcoded English
+<!-- handsoff-issue-882 -->
+- #882: Test gap: PWA InstallPrompt / PendingTxQueuePanel lack unit tests

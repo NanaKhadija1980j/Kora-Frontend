@@ -1,35 +1,82 @@
-import React from "react";
-import { format } from "date-fns";
+"use client";
 
-export interface ChartTooltipPayloadItem {
-  value?: number | string | Array<number | string>;
-  name?: string | number;
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+
+/** A single data series rendered inside the tooltip. */
+export interface ChartTooltipSeries {
+  /** Series name shown as the row label. */
+  name: string;
+  /** Numeric value for the series. */
+  value: number;
+  /** Optional CSS color used for the series swatch. */
+  color?: string;
 }
 
-/** Props injected by Recharts' `<Tooltip content={...} />` plus our `unit`. */
+/** Props accepted by {@link ChartTooltip}. */
 export interface ChartTooltipProps {
+  /** Whether the tooltip is currently visible. */
   active?: boolean;
-  payload?: ReadonlyArray<ChartTooltipPayloadItem>;
+  /** Heading shown at the top of the tooltip (e.g. the x-axis label). */
   label?: string | number;
-  unit?: string;
+  /** Series to render as rows. */
+  series?: ChartTooltipSeries[];
+  /** Optional formatter applied to each series value. */
+  valueFormatter?: (value: number) => string;
+  /** Optional className merged onto the tooltip container. */
+  className?: string;
 }
 
-export default function ChartTooltip({ active, payload, label, unit = "USDC" }: ChartTooltipProps) {
-  if (!active || !Array.isArray(payload) || payload.length === 0) return null;
-  const item = payload[0];
-  if (!item || item.value === undefined || item.value === null) return null;
-  const value = item.value;
-  const date = label;
+/**
+ * Shared tooltip used by the analytics charts.
+ *
+ * Renders a typed label plus one row per series, so charts can pass their
+ * payload through without casting to `any`.
+ */
+export function ChartTooltip({
+  active,
+  label,
+  series = [],
+  valueFormatter,
+  className,
+}: ChartTooltipProps) {
+  if (!active || series.length === 0) {
+    return null;
+  }
+
+  const format = valueFormatter ?? ((value: number) => value.toLocaleString());
 
   return (
-    <div style={{ background: "rgba(24,24,27,0.9)", border: "1px solid #27272a", padding: 10, borderRadius: 8, color: "#e6eef0", minWidth: 160 }}>
-      <div style={{ fontSize: 12, color: "#9ca3af" }}>{typeof date === "number" ? format(new Date(date), "yyyy-MM-dd") : (date ?? "")}</div>
-      <div style={{ marginTop: 6, display: "flex", alignItems: "baseline", gap: 8 }}>
-        <div style={{ fontSize: 14, fontWeight: 700, color: "#14b8a6" }}>
-          {unit === "USDC" ? `$${Number(value).toLocaleString()}` : Number(value).toLocaleString()}
-        </div>
-        <div style={{ fontSize: 12, color: "#9ca3af" }}>{item.name ?? ""}</div>
-      </div>
-    </div>
+    <motion.div
+      initial={{ opacity: 0, y: 4 }}
+      animate={{ opacity: 1, y: 0 }}
+      className={cn(
+        "rounded-lg border border-border/50 bg-background/95 px-3 py-2 text-xs shadow-md backdrop-blur",
+        className
+      )}
+    >
+      {label !== undefined && (
+        <p className="mb-1 font-medium text-foreground">{label}</p>
+      )}
+      <ul className="flex flex-col gap-0.5">
+        {series.map((item) => (
+          <li key={item.name} className="flex items-center justify-between gap-3">
+            <span className="flex items-center gap-1.5 text-muted-foreground">
+              {item.color && (
+                <span
+                  aria-hidden="true"
+                  className="h-2 w-2 rounded-full"
+                  style={{ backgroundColor: item.color }}
+                />
+              )}
+              {item.name}
+            </span>
+            <span className="font-medium text-foreground">
+              {format(item.value)}
+            </span>
+          </li>
+        ))}
+      </ul>
+    </motion.div>
   );
 }
