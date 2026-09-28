@@ -182,6 +182,144 @@ describe("buildVintageCohorts", () => {
     expect(cohorts).toHaveLength(1);
     expect(cohorts[0].totalInvested).toBe(1000);
   });
+
+  it("returns an empty array for an empty position list", () => {
+    expect(buildVintageCohorts([])).toEqual([]);
+  });
+
+  it("labels every emitted row with its readable month", () => {
+    const cohorts = buildVintageCohorts([
+      pos("2026-01-01T00:00:00Z", 1000),
+      pos("2026-03-01T00:00:00Z", 1000),
+    ]);
+
+    // The gap month is still labelled — a chart axis needs a tick for it.
+    expect(cohorts.map((c) => c.label)).toEqual(["Jan 2026", "Feb 2026", "Mar 2026"]);
+  });
+
+  it("treats a non-finite invested amount as zero rather than NaN", () => {
+    const cohorts = buildVintageCohorts([
+      { fundedAt: "2026-01-01T00:00:00Z", investedAmount: Number.NaN, status: "active" },
+      { fundedAt: "2026-01-02T00:00:00Z", investedAmount: 1000, status: "active" },
+    ]);
+
+    expect(cohorts[0].totalInvested).toBe(1000);
+    expect(Number.isFinite(cohorts[0].totalInvested)).toBe(true);
+  });
+
+  it("skips a position whose funding date is an empty string", () => {
+    const cohorts = buildVintageCohorts([
+      { fundedAt: "", investedAmount: 5000, status: "active" },
+      pos("2026-01-01T00:00:00Z", 1000),
+    ]);
+
+    expect(cohorts).toHaveLength(1);
+    expect(cohorts[0].totalInvested).toBe(1000);
+  });
+
+  it("keeps defaulted counting on an empty gap row at zero", () => {
+    const cohorts = buildVintageCohorts([
+      pos("2026-01-01T00:00:00Z", 1000, { status: "defaulted" }),
+      pos("2026-03-01T00:00:00Z", 1000),
+    ]);
+
+    const gap = cohorts[1];
+    expect(gap.month).toBe("2026-02");
+    expect(gap.isEmpty).toBe(true);
+    expect(gap.defaultedCount).toBe(0);
+    expect(gap.defaultRate).toBe(0);
+    expect(gap.totalInvested).toBe(0);
+    expect(gap.weightedApr).toBeNull();
+  });
+
+  it("counts charged_off and default as defaulted proxies", () => {
+    const cohorts = buildVintageCohorts([
+      pos("2026-01-01T00:00:00Z", 1000, { status: "charged_off" }),
+      pos("2026-01-02T00:00:00Z", 1000, { status: "default" }),
+      pos("2026-01-03T00:00:00Z", 1000, { status: "active" }),
+    ]);
+
+    expect(cohorts[0].defaultedCount).toBe(2);
+    expect(cohorts[0].defaultRate).toBeCloseTo(66.67, 2);
+  });
+
+  it("does not count a missing status as defaulted", () => {
+    const cohorts = buildVintageCohorts([
+      { fundedAt: "2026-01-01T00:00:00Z", investedAmount: 1000, status: null },
+      { fundedAt: "2026-01-02T00:00:00Z", investedAmount: 1000 },
+    ]);
+
+    expect(cohorts[0].defaultedCount).toBe(0);
+  });
+});
+
+describe("weighted APR", () => {
+  it("returns the position APR verbatim when a cohort has a single carrying position", () => {
+    const cohorts = buildVintageCohorts([
+      pos("2026-01-01T00:00:00Z", 5000, { apr: 7.5 }),
+    ]);
+
+    expect(cohorts[0].weightedApr).toBe(7.5);
+  });
+
+  it("excludes positions with no APR from the weighting entirely", () => {
+    // A missing APR must not be treated as 0% and drag the average down.
+    const cohorts = buildVintageCohorts([
+      pos("2026-01-01T00:00:00Z", 99_000, { apr: 8 }),
+      pos("2026-01-02T00:00:00Z", 90_000, { apr: null }),
+    ]);
+
+    expect(cohorts[0].weightedApr).toBe(8);
+    // The APR-less position still counts toward exposure.
+    expect(cohorts[0].totalInvested).toBe(189_000);
+    expect(cohorts[0].positionCount).toBe(2);
+  });
+
+  it("excludes a zero-amount position because it cannot carry weight", () => {
+    const cohorts = buildVintageCohorts([
+      pos("2026-01-01T00:00:00Z", 1000, { apr: 6 }),
+      pos("2026-01-02T00:00:00Z", 0, { apr: 99 }),
+    ]);
+
+    expect(cohorts[0].weightedApr).toBe(6);
+  });
+
+  it("excludes a non-finite APR from the weighting", () => {
+    const cohorts = buildVintageCohorts([
+      pos("2026-01-01T00:00:00Z", 1000, { apr: Number.NaN }),
+    ]);
+
+    expect(cohorts[0].weightedApr).toBeNull();
+  });
+
+  it("keeps a zero APR as a real value rather than treating it as absent", () => {
+    const cohorts = buildVintageCohorts([
+      pos("2026-01-01T00:00:00Z", 1000, { apr: 0 }),
+    ]);
+
+    expect(cohorts[0].weightedApr).toBe(0);
+  });
+
+  it("weights across three positions in the same cohort", () => {
+    const cohorts = buildVintageCohorts([
+      pos("2026-01-01T00:00:00Z", 1000, { apr: 10 }),
+      pos("2026-01-02T00:00:00Z", 2000, { apr: 12 }),
+      pos("2026-01-03T00:00:00Z", 1000, { apr: 14 }),
+    ]);
+
+    // (10*1000 + 12*2000 + 14*1000) / 4000
+    expect(cohorts[0].weightedApr).toBe(12);
+  });
+
+  it("does not let one cohort's APR leak into another", () => {
+    const cohorts = buildVintageCohorts([
+      pos("2026-01-01T00:00:00Z", 1000, { apr: 5 }),
+      pos("2026-02-01T00:00:00Z", 1000, { apr: 15 }),
+    ]);
+
+    expect(cohorts[0].weightedApr).toBe(5);
+    expect(cohorts[1].weightedApr).toBe(15);
+  });
 });
 
 describe("investedAt alias", () => {
@@ -203,6 +341,52 @@ describe("investedAt alias", () => {
       },
     ]);
     expect(cohorts[0].month).toBe("2026-05");
+  });
+
+  it("falls back to investedAt when fundedAt is null", () => {
+    const cohorts = buildVintageCohorts([
+      {
+        investedAmount: 1000,
+        fundedAt: null,
+        investedAt: "2026-02-10T00:00:00Z",
+        status: "active",
+      },
+    ]);
+    expect(cohorts).toHaveLength(1);
+    expect(cohorts[0].month).toBe("2026-02");
+  });
+
+  it("groups a mixed fundedAt/investedAt book into the same month", () => {
+    // Real data carries both spellings across different sources, so the two
+    // cohorts have to merge rather than split on the field name alone.
+    const cohorts = buildVintageCohorts([
+      { investedAmount: 1000, fundedAt: "2026-01-10T00:00:00Z", status: "active" },
+      { investedAmount: 2000, investedAt: "2026-01-20T00:00:00Z", status: "active" },
+    ]);
+
+    expect(cohorts).toHaveLength(1);
+    expect(cohorts[0].positionCount).toBe(2);
+    expect(cohorts[0].totalInvested).toBe(3000);
+  });
+
+  it("excludes a position carrying neither date field", () => {
+    const cohorts = buildVintageCohorts([
+      { investedAmount: 1000, status: "active" },
+      pos("2026-01-01T00:00:00Z", 500),
+    ]);
+
+    expect(cohorts).toHaveLength(1);
+    expect(cohorts[0].totalInvested).toBe(500);
+  });
+
+  it("excludes a position whose investedAt is an unparseable date", () => {
+    const cohorts = buildVintageCohorts([
+      { investedAmount: 5000, investedAt: "whenever", status: "active" },
+      pos("2026-01-01T00:00:00Z", 1000),
+    ]);
+
+    expect(cohorts).toHaveLength(1);
+    expect(cohorts[0].totalInvested).toBe(1000);
   });
 });
 
@@ -228,5 +412,40 @@ describe("cohortsToExportRows", () => {
   it("exports an empty string rather than null for a missing APR", () => {
     const cohorts = buildVintageCohorts([pos("2026-01-01T00:00:00Z", 1000)]);
     expect(cohortsToExportRows(cohorts)[0].weightedApr).toBe("");
+  });
+
+  it("rounds a fractional weighted APR to two decimals for CSV", () => {
+    const cohorts = buildVintageCohorts([
+      pos("2026-01-01T00:00:00Z", 99_000, { apr: 8 }),
+      pos("2026-01-02T00:00:00Z", 1_000, { apr: 20 }),
+    ]);
+
+    expect(cohortsToExportRows(cohorts)[0].weightedApr).toBe("8.12");
+  });
+
+  it("emits one export row per cohort, gap months included", () => {
+    const cohorts = buildVintageCohorts([
+      pos("2026-01-01T00:00:00Z", 1000),
+      pos("2026-03-01T00:00:00Z", 1000),
+    ]);
+
+    const rows = cohortsToExportRows(cohorts);
+    expect(rows).toHaveLength(3);
+    expect(rows.map((r) => r.vintageLabel)).toEqual([
+      "Jan 2026",
+      "Feb 2026",
+      "Mar 2026",
+    ]);
+    expect(rows[1]).toMatchObject({
+      positionCount: 0,
+      totalInvested: 0,
+      weightedApr: "",
+      defaultedCount: 0,
+      defaultRatePercent: "0.00",
+    });
+  });
+
+  it("exports an empty list when there are no cohorts", () => {
+    expect(cohortsToExportRows([])).toEqual([]);
   });
 });
