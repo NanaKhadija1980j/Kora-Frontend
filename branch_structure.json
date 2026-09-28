@@ -1,0 +1,33 @@
+{
+  "default_branch": "main",
+  "branches": [
+    "feat/batch-actions",
+    "feat/frontend-accessibility-and-storage-improvements",
+    "fix/807-test-add-unit-tests-for-lib-vintagecohorts-grouping",
+    "fix/808-test-add-unit-tests-for-lib-csrf-double-submit-verification",
+    "fix/810-test-add-unit-tests-for-lib-verifiedsessions-expiry",
+    "fix/811-test-add-unit-tests-for-lib-installpromptanalytics-cohort-detection",
+    "main",
+    "origin"
+  ],
+  "parent": {
+    "feat/batch-actions": "main",
+    "feat/frontend-accessibility-and-storage-improvements": "main",
+    "fix/807-test-add-unit-tests-for-lib-vintagecohorts-grouping": "main",
+    "fix/808-test-add-unit-tests-for-lib-csrf-double-submit-verification": "main",
+    "fix/810-test-add-unit-tests-for-lib-verifiedsessions-expiry": "main",
+    "fix/811-test-add-unit-tests-for-lib-installpromptanalytics-cohort-detection": "main",
+    "main": null,
+    "origin": "main"
+  },
+  "order": [
+    "main",
+    "feat/batch-actions",
+    "feat/frontend-accessibility-and-storage-improvements",
+    "fix/807-test-add-unit-tests-for-lib-vintagecohorts-grouping",
+    "fix/808-test-add-unit-tests-for-lib-csrf-double-submit-verification",
+    "fix/810-test-add-unit-tests-for-lib-verifiedsessions-expiry",
+    "fix/811-test-add-unit-tests-for-lib-installpromptanalytics-cohort-detection",
+    "origin"
+  ]
+}
