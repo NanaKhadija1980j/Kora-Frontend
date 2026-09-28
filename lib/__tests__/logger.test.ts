@@ -75,6 +75,13 @@ describe("Structured Logger", () => {
     });
   });
 
+  it("accepts unknown values and passes non-object primitives through", () => {
+    expect(redact(42)).toBe(42);
+    expect(redact(null)).toBeNull();
+    expect(redact(undefined)).toBeUndefined();
+    expect(redact([{ token: "abc" }, "plain"])).toEqual([{ token: "[REDACTED]" }, "plain"]);
+  });
+
   it("reports client errors to vitals with a csrf token and sanitized payload", async () => {
     const fetchMock = vi.fn()
       .mockResolvedValueOnce({
