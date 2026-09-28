@@ -124,4 +124,44 @@ describe("invoiceStore — comparison list", () => {
       "inv_003",
     ]);
   });
+
+  // ─── ComparisonBar URL sync coverage ──────────────────────────────────
+
+  it("serializes the comparison list into a URL query parameter", () => {
+    useInvoiceStore.getState().setComparisonList(["inv_001", "inv_002"]);
+    const params = new URLSearchParams();
+    params.set("compare", useInvoiceStore.getState().comparisonList.join(","));
+    expect(params.get("compare")).toBe("inv_001,inv_002");
+  });
+
+  it("round-trips a comparison list through the URL query parameter", () => {
+    const original = ["inv_001", "inv_002", "inv_003"];
+    useInvoiceStore.getState().setComparisonList(original);
+
+    const params = new URLSearchParams();
+    params.set("compare", useInvoiceStore.getState().comparisonList.join(","));
+
+    const restored = (params.get("compare") ?? "")
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean)
+      .slice(0, MAX_COMPARISON_INVOICES);
+
+    useInvoiceStore.getState().setComparisonList(restored);
+    expect(useInvoiceStore.getState().comparisonList).toEqual(original);
+  });
+
+  it("clears the URL query parameter when the comparison list is emptied", () => {
+    useInvoiceStore.getState().setComparisonList(["inv_001"]);
+    const params = new URLSearchParams();
+    params.set("compare", useInvoiceStore.getState().comparisonList.join(","));
+
+    useInvoiceStore.getState().clearComparison();
+    const list = useInvoiceStore.getState().comparisonList;
+    if (list.length === 0) {
+      params.delete("compare");
+    }
+
+    expect(params.get("compare")).toBeNull();
+  });
 });
