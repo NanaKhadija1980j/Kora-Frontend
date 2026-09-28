@@ -120,18 +120,35 @@ export function BatchTxQueuePanel({
   const total = items.length;
   const percent = total > 0 ? (processed / total) * 100 : 0;
 
-  // Accessible live-region: announce status changes
-  const liveRef = useRef<HTMLDivElement>(null);
-  const prevProcessed = useRef(processed);
-  useEffect(() => {
-    if (processed !== prevProcessed.current) {
-      prevProcessed.current = processed;
-    }
-  }, [processed]);
-
   const isDone = !isRunning && total > 0 && processed === total;
   const hasFailures = failedCount > 0;
   const allSuccess = isDone && failedCount === 0;
+
+  // Accessible live-region: announce status changes
+  const [announcement, setAnnouncement] = useState("");
+  const prevProcessed = useRef(processed);
+  const prevIsDone = useRef(isDone);
+  const prevFailedCount = useRef(failedCount);
+  useEffect(() => {
+    if (isDone && !prevIsDone.current) {
+      setAnnouncement(
+        failedCount > 0
+          ? `Batch complete. ${successCount} of ${total} succeeded, ${failedCount} failed.`
+          : `Batch complete. All ${total} operations succeeded.`,
+      );
+    } else if (failedCount > prevFailedCount.current) {
+      setAnnouncement(
+        `Batch operation failed. ${failedCount} of ${total} failed so far.`,
+      );
+    } else if (processed !== prevProcessed.current) {
+      setAnnouncement(
+        `Batch progress: ${processed} of ${total} processed.`,
+      );
+    }
+    prevProcessed.current = processed;
+    prevIsDone.current = isDone;
+    prevFailedCount.current = failedCount;
+  }, [processed, isDone, failedCount, successCount, total]);
 
   // Don't render when there's nothing to show
   if (total === 0) return null;
@@ -147,6 +164,18 @@ export function BatchTxQueuePanel({
       )}
       data-testid="batch-tx-queue-panel"
     >
+      {/* Accessible live region for status announcements */}
+      <div
+        ref={liveRef}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+        data-testid="batch-tx-queue-live-region"
+      >
+        {announcement}
+      </div>
+
       {/* Header */}
       <div className="flex items-center justify-between gap-3 px-4 py-3 border-b border-zinc-800/60">
         <div className="flex items-center gap-2 min-w-0">
@@ -239,85 +268,34 @@ export function BatchTxQueuePanel({
       {/* Live status items — collapsible */}
       <AnimatePresence initial={false}>
         {!collapsed && (
-          <motion.div
-            key="items"
+          <motion.ul
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
+            transition={{ duration: 0.2, ease: "easeOut" }}
+            className="divide-y divide-zinc-800/40 overflow-hidden"
+            data-testid="batch-panel-items"
           >
-            {/* Accessible live region for screen-reader announcements */}
-            <div
-              ref={liveRef}
-              role="status"
-              aria-live="polite"
-              aria-atomic="false"
-              className="sr-only"
-              data-testid="batch-panel-live-region"
-            >
-              {isRunning
-                ? `Processing ${processed} of ${total} batch transactions`
-                : isDone
-                  ? `Batch complete: ${successCount} succeeded, ${failedCount} failed`
-                  : `${total} batch operations queued`}
-            </div>
-
-            <ul
-              className="max-h-52 overflow-y-auto divide-y divide-zinc-800/40 px-2 py-1"
-              data-testid="batch-panel-item-list"
-              aria-label="Batch transaction queue items"
-            >
-              {items.map((item) => (
-                <li
-                  key={`${item.action}-${item.id}`}
-                  className={cn(
-                    "flex items-start gap-3 rounded-lg border my-0.5 px-3 py-2 text-xs transition-colors",
-                    statusRowClass(item.status),
-                  )}
-                  data-testid={`batch-item-${item.id}`}
-                  data-status={item.status}
-                >
-                  {/* Status icon */}
-                  {statusIcon(item.status)}
-
-                  {/* Label + action */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1.5">
-                      {actionIcon(item.action)}
-                      <span className="font-mono text-zinc-300 truncate">{item.label}</span>
-                    </div>
-                    {item.error && (
-                      <p
-                        className="mt-0.5 text-[11px] text-destructive/90 line-clamp-2"
-                        title={item.error}
-                      >
-                        {item.error}
-                      </p>
-                    )}
-                    {item.txHash && (
-                      <p className="mt-0.5 text-[11px] text-zinc-600 font-mono truncate">
-                        {item.txHash.slice(0, 12)}…
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Status label */}
-                  <span
-                    className={cn(
-                      "shrink-0 text-[11px] font-medium capitalize",
-                      item.status === "success" && "text-emerald-400",
-                      item.status === "failed" && "text-destructive",
-                      item.status === "processing" && "text-primary",
-                      (item.status === "pending" || item.status === "skipped") && "text-zinc-500",
-                    )}
-                  >
-                    {statusLabel(item.status)}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </motion.div>
+            {items.map((item) => (
+              <li
+                key={item.id}
+                className={cn(
+                  "flex items-center gap-2 px-4 py-2 border-l-2",
+                  statusRowClass(item.status),
+                )}
+                data-testid={`batch-panel-item-${item.id}`}
+              >
+                {statusIcon(item.status)}
+                {actionIcon(item.action)}
+                <span className="text-xs text-zinc-300 truncate flex-1 min-w-0">
+                  {item.label}
+                </span>
+                <span className="text-[11px] text-zinc-500 shrink-0">
+                  {statusLabel(item.status)}
+                </span>
+              </li>
+            ))}
+          </motion.ul>
         )}
       </AnimatePresence>
     </motion.div>
