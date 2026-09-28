@@ -516,3 +516,8 @@ MIT © 2025 Kora Protocol Contributors
     <a href="https://nextjs.org">Next.js</a>
   </p>
 </div>
+
+## Handsoff notes
+
+<!-- handsoff-issue-882 -->
+- #882: Test gap: PWA InstallPrompt / PendingTxQueuePanel lack unit tests
